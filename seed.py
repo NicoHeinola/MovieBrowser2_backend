@@ -1,5 +1,5 @@
 from database import SessionLocal, engine
-from models.models import Base, Movie
+from models.show import Base, Movie
 
 Base.metadata.create_all(bind=engine)
 
