@@ -28,6 +28,11 @@ def run_migrations_online():
             context.run_migrations()
 
 
+url: str = config.get_main_option("sqlalchemy.url")
+if url.startswith("sqlite:///"):
+    path: str = url.split("sqlite:///")[1]
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
 if context.is_offline_mode():
     run_migrations_offline()
 else:
