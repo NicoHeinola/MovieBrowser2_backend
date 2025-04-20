@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal, get_database
+from database import get_database
 from models import show as show_model
 from schemas import show as show_schema
 
@@ -8,8 +8,8 @@ router = APIRouter()
 
 
 @router.post("/", response_model=show_schema.Show)
-def create_show(show: show_schema.ShowCreate, db: Session = Depends(get_database)):
-    db_show = show_model.Show(**show.dict())
+def create_show(data: show_schema.ShowCreate, db: Session = Depends(get_database)):
+    db_show = show_model.Show(**data.model_dump())
     db.add(db_show)
     db.commit()
     db.refresh(db_show)
@@ -17,12 +17,15 @@ def create_show(show: show_schema.ShowCreate, db: Session = Depends(get_database
 
 
 @router.put("/{show_id}", response_model=show_schema.Show)
-def update_show(show_id: int, show_update: show_schema.ShowUpdate, db: Session = Depends(get_database)):
+def update_show(show_id: int, data: show_schema.ShowUpdate, db: Session = Depends(get_database)):
     db_show = db.query(show_model.Show).filter(show_model.Show.id == show_id).first()
     if not db_show:
         raise HTTPException(status_code=404, detail="Show not found")
-    for key, value in show_update.dict().items():
+
+    update_data = data.model_dump()
+    for key, value in update_data.items():
         setattr(db_show, key, value)
+
     db.commit()
     db.refresh(db_show)
     return db_show

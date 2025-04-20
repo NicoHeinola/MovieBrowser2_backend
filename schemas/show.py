@@ -12,7 +12,7 @@ class ShowCreate(ShowBase):
     pass
 
 
-class ShowUpdate(BaseModel):
+class ShowUpdate(ShowBase):
     pass
 
 
