@@ -13,6 +13,7 @@ def upgrade():
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("title", sa.String, nullable=False),
         sa.Column("description", sa.String, nullable=False),
+        sa.Column("image", sa.String, nullable=False),
     )
 
 

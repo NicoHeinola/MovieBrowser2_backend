@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class ShowBase(BaseModel):
     title: str
     description: str
+    image: str
 
 
 class ShowCreate(ShowBase):
