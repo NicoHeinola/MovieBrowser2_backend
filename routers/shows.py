@@ -28,6 +28,16 @@ def update_show(show_id: int, show_update: show_schema.ShowUpdate, db: Session =
     return db_show
 
 
+@router.delete("/{show_id}", response_model=show_schema.Show)
+def delete_show(show_id: int, db: Session = Depends(get_database)):
+    db_show = db.query(show_model.Show).filter(show_model.Show.id == show_id).first()
+    if not db_show:
+        raise HTTPException(status_code=404, detail="Show not found")
+    db.delete(db_show)
+    db.commit()
+    return db_show
+
+
 @router.get("/", response_model=list[show_schema.Show])
 def read_shows(skip: int = 0, limit: int = 10, db: Session = Depends(get_database)):
     return db.query(show_model.Show).offset(skip).limit(limit).all()

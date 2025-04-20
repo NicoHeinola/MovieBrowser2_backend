@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ShowBase(BaseModel):
     title: str
-    description: str
-    image: str
+    description: Optional[str] = None
+    image: Optional[str] = None
 
 
 class ShowCreate(ShowBase):

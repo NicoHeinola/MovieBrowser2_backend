@@ -22,6 +22,16 @@ A simple backend for managing and browsing shows/movies.
    uvicorn main:app --reload
    ```
 
+## Rollback
+
+To rollback the database to the previous migration, run:
+
+```bash
+alembic downgrade -1
+```
+
+You can specify a particular revision by replacing `-1` with the desired revision identifier.
+
 ## API
 
 - `GET /shows` - List all shows
