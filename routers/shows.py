@@ -31,11 +31,13 @@ def create_show(data: ShowCreate, db: Session = Depends(get_db)):
         image=data.image,
     )
 
+    db.add(db_show)
+    db.flush()
+
     if data.seasons is not None:
         seasons = [season.model_dump() for season in data.seasons]
         db_show.sync_seasons(seasons, db)
 
-    db.add(db_show)
     db.commit()
     db.refresh(db_show)
     return db_show
