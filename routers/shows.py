@@ -1,8 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import shutil
-import os
 import json
 
 from schemas.show import Show, ShowCreate, ShowUpdate
