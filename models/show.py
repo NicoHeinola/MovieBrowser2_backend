@@ -1,9 +1,16 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
+import os
+import re
 
 from models.base import Base
 from models.season import Season
+
+
+def folder_safe_name(title: str) -> str:
+    # Replace non-alphanumeric characters with underscores and lowercase
+    return re.sub(r"[^a-zA-Z0-9_-]", "_", title).strip("_").lower()
 
 
 class Show(Base):
@@ -12,7 +19,13 @@ class Show(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     image = Column(String, nullable=True)
+    folder_name = Column(String, nullable=False)
     seasons = relationship("Season", back_populates="show", cascade="all, delete-orphan")
+
+    def __init__(self, *args, **kwargs):
+        if "title" in kwargs and "folder_name" not in kwargs:
+            kwargs["folder_name"] = folder_safe_name(kwargs["title"])
+        super().__init__(*args, **kwargs)
 
     def sync_seasons(self, seasons_data, db: Session):
 
@@ -58,3 +71,16 @@ class Show(Base):
                 db.delete(season_to_delete)
 
         db.commit()
+
+    def rename_folder(self, old_folder_name: str, shows_path: str):
+        """
+        Rename the show's folder on disk if the folder_name changes.
+        """
+        old_path = os.path.join(shows_path, old_folder_name)
+        new_path = os.path.join(shows_path, self.folder_name)
+
+        old_path = old_path.replace("\\", "/")
+        new_path = new_path.replace("\\", "/")
+
+        if old_folder_name != self.folder_name and os.path.exists(old_path):
+            os.rename(old_path, new_path)

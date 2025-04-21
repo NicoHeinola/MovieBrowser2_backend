@@ -20,5 +20,7 @@ class ShowUpdate(ShowBase):
 
 
 class Show(ShowBase):
+    folder_name: str  # New field
+
     class Config:
         from_attributes = True

@@ -8,3 +8,4 @@ class Episode(BaseModel):
     description: Optional[str] = None
     number: int
     type: Optional[str] = None  # New field added
+    filename: Optional[str] = None  # New field for file name
