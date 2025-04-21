@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 
 from schemas.setting import Setting, SettingCreate, SettingUpdate
 from models.setting import Setting as SettingModel
 from database import get_db
+from utils.setting_seeder import seed_settings
 
 router = APIRouter()
 
@@ -69,3 +70,12 @@ def delete_setting(id: str, db: Session = Depends(get_db)):
     db.commit()
 
     return setting
+
+
+@router.post("/seed")
+def seed_settings_route(db: Session = Depends(get_db)):
+    """
+    Seed/update settings from the default JSON file.
+    """
+    seed_settings(db)
+    return {"ok": True, "message": "Settings seeded from default_settings.json"}
