@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from .show import Base
+
+from models.base import Base
 
 
 class Episode(Base):
