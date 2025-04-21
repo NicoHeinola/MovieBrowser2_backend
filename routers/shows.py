@@ -98,8 +98,8 @@ def delete_show(show_id: int, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@router.post("/episodes/{episode_id}/upload", response_model=Episode)
-def upload_episode_file(episode_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+@router.post("/shows/{show_id}/episodes/{episode_id}/file", response_model=Episode)
+def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     episode = db.query(EpisodeModel).filter(EpisodeModel.id == episode_id).first()
     if not episode:
