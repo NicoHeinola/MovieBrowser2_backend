@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import shows
+from routers import settings  # add this import
 
 app = FastAPI()
 
@@ -14,3 +15,4 @@ app.add_middleware(
 )
 
 app.include_router(shows.router, prefix="/shows")
+app.include_router(settings.router, prefix="/settings")  # add this line
