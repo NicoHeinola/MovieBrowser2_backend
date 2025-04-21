@@ -1,11 +1,13 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from .season import Season  # Import Season from new file
 
 
 class ShowBase(BaseModel):
     title: str
     description: Optional[str] = None
     image: Optional[str] = None
+    seasons: List[Season] = []
 
 
 class ShowCreate(ShowBase):
