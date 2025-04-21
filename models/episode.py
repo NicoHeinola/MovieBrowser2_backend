@@ -11,4 +11,5 @@ class Episode(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     number = Column(Integer, nullable=False)
+    type = Column(String, nullable=True)  # New column added
     season = relationship("Season", back_populates="episodes")

@@ -24,13 +24,17 @@ class Show(Base):
             id = season.get("id")
             season_model: Season = db.query(Season).filter(Season.id == id).first()
 
+            blacklisted_keys = ["episodes"]
+
             if season_model:
                 for key, value in season.items():
+                    if key in blacklisted_keys:
+                        continue
+
                     setattr(season_model, key, value)
                 db.add(season_model)
             else:
                 season_data = season.copy()
-                blacklisted_keys = ["episodes"]
                 for key in blacklisted_keys:
                     season_data.pop(key, None)
 

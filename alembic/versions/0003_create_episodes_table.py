@@ -15,6 +15,7 @@ def upgrade():
         sa.Column("title", sa.String, nullable=False),
         sa.Column("description", sa.String, nullable=True),
         sa.Column("number", sa.Integer, nullable=False),
+        sa.Column("type", sa.String, nullable=True),  # New column added
     )
 
 

@@ -4,6 +4,7 @@ from .season import Season  # Import Season from new file
 
 
 class ShowBase(BaseModel):
+    id: Optional[int] = None
     title: str
     description: Optional[str] = None
     image: Optional[str] = None
@@ -19,7 +20,5 @@ class ShowUpdate(ShowBase):
 
 
 class Show(ShowBase):
-    id: int
-
     class Config:
         from_attributes = True
