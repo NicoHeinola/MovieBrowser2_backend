@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
+import shutil
+import os
+import json
 
 from schemas.show import Show, ShowCreate, ShowUpdate
 from models.show import Show as ShowModel
@@ -24,19 +27,27 @@ def read_show(show_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=Show)
-def create_show(data: ShowCreate, db: Session = Depends(get_db)):
+def create_show(
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    seasons: Optional[str] = Form(None),
+    image: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+):
     db_show = ShowModel(
-        title=data.title,
-        description=data.description,
-        image=data.image,
+        title=title,
+        description=description,
+        image=image,
     )
-
     db.add(db_show)
     db.flush()
 
-    if data.seasons is not None:
-        seasons = [season.model_dump() for season in data.seasons]
-        db_show.sync_seasons(seasons, db)
+    if seasons:
+        try:
+            seasons_data = json.loads(seasons)
+            db_show.sync_seasons(seasons_data, db)
+        except Exception:
+            pass
 
     db.commit()
     db.refresh(db_show)
@@ -44,18 +55,28 @@ def create_show(data: ShowCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/{show_id}", response_model=Show)
-def update_show(show_id: int, data: ShowUpdate, db: Session = Depends(get_db)):
+def update_show(
+    show_id: int,
+    title: str = Form(...),
+    description: Optional[str] = Form(None),
+    seasons: Optional[str] = Form(None),
+    image: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+):
     db_show = db.query(ShowModel).filter(ShowModel.id == show_id).first()
     if not db_show:
         raise HTTPException(status_code=404, detail="Show not found")
 
-    update_data = data.model_dump(exclude={"seasons"})
-    for key, value in update_data.items():
-        setattr(db_show, key, value)
+    db_show.title = title
+    db_show.description = description
+    db_show.image = image
 
-    if data.seasons is not None:
-        seasons = [season.model_dump() for season in data.seasons]
-        db_show.sync_seasons(seasons, db)
+    if seasons:
+        try:
+            seasons_data = json.loads(seasons)
+            db_show.sync_seasons(seasons_data, db)
+        except Exception:
+            pass
 
     db.commit()
     db.refresh(db_show)
