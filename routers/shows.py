@@ -98,7 +98,7 @@ def delete_show(show_id: int, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@router.post("/shows/{show_id}/episodes/{episode_id}/file", response_model=Episode)
+@router.post("/{show_id}/episodes/{episode_id}/file", response_model=Episode)
 def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     episode = db.query(EpisodeModel).filter(EpisodeModel.id == episode_id).first()
@@ -114,13 +114,13 @@ def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(.
         raise HTTPException(status_code=404, detail="Show not found")
 
     # Load shows_path from settings
-    shows_path = db.query(SettingModel).filter(SettingModel.key == "shows_path").first()
+    shows_path_setting = db.query(SettingModel).filter(SettingModel.key == "shows_path").first()
 
-    if not shows_path:
+    if not shows_path_setting.value:
         raise HTTPException(status_code=500, detail="Shows path not configured in settings")
 
-    # Use model method to attach file
-    episode.attach_file(file, show.title, season.number, shows_path)
+    # Attach file to episode model
+    episode.attach_file(file, show.title, season.number, shows_path_setting.value)
 
     db.commit()
     db.refresh(episode)
