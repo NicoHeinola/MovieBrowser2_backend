@@ -1,5 +1,6 @@
 import datetime
 import os
+import shutil
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
@@ -116,4 +117,4 @@ class Season(Base):
 
         full_folder_path: str = self.get_full_folder_path()
         if full_folder_path and os.path.exists(full_folder_path):
-            os.rmdir(full_folder_path)
+            shutil.rmtree(full_folder_path)
