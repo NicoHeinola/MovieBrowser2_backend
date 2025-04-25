@@ -9,6 +9,7 @@ from sqlalchemy.orm import Query
 from models.base import Base
 from models.season import Season
 from models.setting import Setting
+import shutil
 
 
 class Show(Base):
@@ -135,8 +136,8 @@ class Show(Base):
 
     def delete_folder(self):
         """
-        Delete the show's folder on disk.
+        Delete the show's folder on disk, even if it contains files.
         """
         full_folder_path: str = self.get_full_folder_path()
         if full_folder_path and os.path.exists(full_folder_path):
-            os.rmdir(full_folder_path)
+            shutil.rmtree(full_folder_path)
