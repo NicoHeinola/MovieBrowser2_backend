@@ -24,20 +24,23 @@ class Episode(Base):
 
     @staticmethod
     def create_unique_episode_name(episode_number: int) -> str:
-        date_str = datetime.datetime.now().strftime("%Y%m%d")
+        date_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"episode_{episode_number}_{date_str}"
 
-    def get_full_file_path(self) -> str:
+    def get_full_file_path(self) -> str | None:
         # Get the season folder path
         season_folder_path = self.season.get_full_folder_path()
         if not season_folder_path:
+            return None
+
+        if not self.filename:
             return None
 
         # Construct the full file path
         full_file_path = os.path.join(season_folder_path, self.filename)
         return full_file_path
 
-    def update_number(self, new_number: int):
+    def set_number(self, new_number: int):
         if new_number == self.number:
             return
 
@@ -50,10 +53,10 @@ class Episode(Base):
         if not self.filename:
             return
 
-        file_path: str = self.get_full_file_path()
         season_directory = self.season.get_full_folder_path()
         os.makedirs(season_directory, exist_ok=True)
 
+        file_path: str = self.get_full_file_path()
         file_extension = os.path.splitext(file_path)[1]
         unique_filename: str = self.create_unique_episode_name(self.number)
         episode_filename = f"{unique_filename}{file_extension}"
@@ -82,3 +85,9 @@ class Episode(Base):
         self.filename = episode_filename
 
         return episode_filename
+
+    def delete_file(self):
+        full_file_path: str = self.get_full_file_path()
+
+        if full_file_path and os.path.exists(full_file_path):
+            os.remove(full_file_path)

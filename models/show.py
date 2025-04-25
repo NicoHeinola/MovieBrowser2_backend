@@ -22,13 +22,23 @@ class Show(Base):
     @staticmethod
     def create_unique_folder_safe_name(title: str) -> str:
         safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title).strip("_").lower()
-        date_str = datetime.datetime.now().strftime("%Y%m%d")
+        date_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{safe_title}_{date_str}"
 
     def __init__(self, *args, **kwargs):
         if "title" in kwargs and "folder_name" not in kwargs:
             kwargs["folder_name"] = self.create_unique_folder_safe_name(kwargs["title"])
         super().__init__(*args, **kwargs)
+
+    def get_full_folder_path(self) -> str | None:
+        if not self.folder_name:
+            return None
+
+        shows_folder_path = Setting.get_shows_folder_path()
+        if not shows_folder_path:
+            return None
+
+        return os.path.join(shows_folder_path, self.folder_name)
 
     def sync_seasons(self, seasons_data, db: Session):
 
@@ -40,7 +50,7 @@ class Show(Base):
             id = season.get("id")
             season_model: Season = db.query(Season).filter(Season.id == id).first()
 
-            blacklisted_keys = ["episodes"]
+            blacklisted_keys = ["episodes", "number"]
 
             if season_model:
                 for key, value in season.items():
@@ -48,18 +58,33 @@ class Show(Base):
                         continue
 
                     setattr(season_model, key, value)
+
+                season_model.show = self
+
+                if "number" in season:
+                    season_model.set_number(season["number"])
+
                 db.add(season_model)
             else:
                 season_data = season.copy()
+                number: int = season_data["number"]
+
                 for key in blacklisted_keys:
                     season_data.pop(key, None)
 
                 season_model = Season(**season_data)
+
+                season_model.show = self
+
+                season_model.set_number(number)
+
                 db.add(season_model)
                 self.seasons.append(season_model)
 
-            # Sync episodes
+            # Save changes
             db.flush()
+
+            # Sync episodes
             if "episodes" in season:
                 season_model.sync_episodes(season["episodes"], db)
 
@@ -70,12 +95,15 @@ class Show(Base):
         # Remove seasons that are not in the new data
         for season_id in season_ids_to_delete:
             season_to_delete = db.query(Season).filter(Season.id == season_id).first()
-            if season_to_delete:
-                db.delete(season_to_delete)
+            if not season_to_delete:
+                continue
+
+            season_to_delete.delete_folder()
+            db.delete(season_to_delete)
 
         db.commit()
 
-    def update_title(self, new_title: str):
+    def set_title(self, new_title: str):
         """
         Update the show's title and folder name.
         """
@@ -90,33 +118,19 @@ class Show(Base):
         """
         Rename the show's folder on disk if the folder_name changes.
         """
-        shows_path: str = Setting.get_shows_folder_path()
-        if not shows_path:
-            raise Exception("Shows path not configured in settings")
+        old_path: str = self.get_full_folder_path()
 
         self.folder_name = self.create_unique_folder_safe_name(self.title)
 
-        # No need to rename anything if we don't have a folder name
-        if not self.folder_name:
-            return
+        new_path: str = self.get_full_folder_path()
 
-        old_path: str = os.path.join(shows_path, self.folder_name)
-        new_path: str = os.path.join(shows_path, self.folder_name)
-
-        old_path = old_path.replace("\\", "/")
-        new_path = new_path.replace("\\", "/")
-
-        if os.path.exists(old_path):
+        if old_path and os.path.exists(old_path):
             os.rename(old_path, new_path)
 
     def delete_folder(self):
         """
         Delete the show's folder on disk.
         """
-        shows_path: str = Setting.get_shows_folder_path()
-        if not shows_path:
-            raise Exception("Shows path not configured in settings")
-
-        path = os.path.join(shows_path, self.folder_name)
-        if os.path.exists(path):
-            os.rmdir(path)
+        full_folder_path: str = self.get_full_folder_path()
+        if full_folder_path and os.path.exists(full_folder_path):
+            os.rmdir(full_folder_path)

@@ -37,7 +37,7 @@ def create_show(data: ShowCreate, db: Session = Depends(get_db)):
         image=data.image,
     )
 
-    db_show.update_title(data.title)
+    db_show.set_title(data.title)
 
     db.add(db_show)
     db.flush()
@@ -64,7 +64,7 @@ def update_show(show_id: int, data: ShowUpdate, db: Session = Depends(get_db)):
 
     # If title is updated, update folder_name (contains the show's episodes)
     if data.title:
-        db_show.update_title(data.title)
+        db_show.set_title(data.title)
 
     if data.seasons is not None:
         seasons = [season.model_dump() for season in data.seasons]

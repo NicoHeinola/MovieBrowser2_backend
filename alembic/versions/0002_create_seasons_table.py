@@ -16,6 +16,7 @@ def upgrade():
         sa.Column("description", sa.String, nullable=True),
         sa.Column("image", sa.String, nullable=True),
         sa.Column("number", sa.Integer, nullable=False),
+        sa.Column("folder_name", sa.String, nullable=True),
     )
 
 
