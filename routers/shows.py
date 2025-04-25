@@ -1,17 +1,14 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
-import re
 
 from schemas.episode import Episode
 from schemas.show import Show, ShowCreate, ShowUpdate
 from models.show import Show as ShowModel
-from models.setting import Setting as SettingModel
 from database import get_db
 from models.episode import Episode as EpisodeModel
-from models.season import Season as SeasonModel
 from models.show import Show as ShowModel
-from datetime import datetime
 
 router = APIRouter()
 
@@ -101,3 +98,47 @@ def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(.
     db.refresh(episode)
 
     return episode
+
+
+# Removes unused files and folders that may not have been removed due to errors
+@router.post("/cleanup")
+def upload_episode_file(db: Session = Depends(get_db)):
+    shows = db.query(ShowModel).filter().all()
+
+    for show in shows:
+        files_to_keep: list = []
+        for season in show.seasons:
+            for episode in season.episodes:
+                episode_file_path: str = episode.get_full_file_path()
+                if not episode_file_path:
+                    continue
+
+                if os.path.exists(episode_file_path):
+                    files_to_keep.append(episode_file_path)
+
+        show_folder = show.get_full_folder_path()
+        if not os.path.exists(show_folder):
+            continue
+
+        removable_file_types: list = ["mkv", "mp4", "mov", "avi", "webm"]
+
+        for root, dirs, files in os.walk(show_folder):
+            for file in files:
+                file_path = os.path.join(root, file)
+                ext = os.path.splitext(file)[1][1:].lower()
+                if file_path not in files_to_keep and ext in removable_file_types:
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        print(f"Failed to remove {file_path}: {e}")
+
+        # Remove empty folders (including those that only contain empty folders)
+        for dirpath, dirnames, filenames in os.walk(show_folder, topdown=False):
+            try:
+                # If all contents are directories and all are empty, remove them recursively
+                if not os.listdir(dirpath):
+                    os.rmdir(dirpath)
+            except Exception as e:
+                print(f"Failed to remove folder {dirpath}: {e}")
+
+    return {}
