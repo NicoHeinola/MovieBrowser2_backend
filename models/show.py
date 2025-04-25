@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
 import os
 import re
+from sqlalchemy.orm import Query
 
 from models.base import Base
 from models.season import Season
@@ -24,6 +25,11 @@ class Show(Base):
         safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title).strip("_").lower()
         date_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{safe_title}_{date_str}"
+
+    @staticmethod
+    def filterBySearch(query: Query, search_text: str):
+        query = query.filter(Show.title.like(f"%{search_text}%"))
+        return query
 
     def __init__(self, *args, **kwargs):
         if "title" in kwargs and "folder_name" not in kwargs:

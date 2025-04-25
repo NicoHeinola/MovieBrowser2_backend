@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -14,8 +14,16 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[Show])
-def read_shows(db: Session = Depends(get_db)):
-    shows = db.query(ShowModel).all()
+def read_shows(request: Request, db: Session = Depends(get_db)):
+    query_params = request.query_params
+
+    query = db.query(ShowModel)
+
+    if "search[search]" in query_params:
+        query = ShowModel.filterBySearch(query, query_params.get("search[search]"))
+
+    shows = query.all()
+
     return shows
 
 
