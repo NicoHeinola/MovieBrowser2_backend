@@ -11,12 +11,9 @@ from database import get_db
 from models.episode import Episode as EpisodeModel
 from models.season import Season as SeasonModel
 from models.show import Show as ShowModel
+from datetime import datetime
 
 router = APIRouter()
-
-
-def folder_safe_name(title: str) -> str:
-    return re.sub(r"[^a-zA-Z0-9_-]", "_", title).strip("_").lower()
 
 
 @router.get("/", response_model=List[Show])
@@ -36,11 +33,11 @@ def read_show(show_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=Show)
 def create_show(data: ShowCreate, db: Session = Depends(get_db)):
     db_show = ShowModel(
-        title=data.title,
         description=data.description,
         image=data.image,
-        folder_name=folder_safe_name(data.title),  # Set folder_name
     )
+
+    db_show.update_title(data.title)
 
     db.add(db_show)
     db.flush()
@@ -60,24 +57,14 @@ def update_show(show_id: int, data: ShowUpdate, db: Session = Depends(get_db)):
     if not db_show:
         raise HTTPException(status_code=404, detail="Show not found")
 
-    update_data = data.model_dump(exclude={"seasons"})
-    old_folder_name = db_show.folder_name
+    update_data = data.model_dump(exclude={"seasons", "title"})
 
     for key, value in update_data.items():
         setattr(db_show, key, value)
 
-    # If title is updated, update folder_name
-    if "title" in update_data and update_data["title"]:
-        new_folder_name = folder_safe_name(update_data["title"])
-        if new_folder_name != db_show.folder_name:
-            db_show.folder_name = new_folder_name
-
-            shows_path_setting = db.query(SettingModel).filter(SettingModel.key == "shows_path").first()
-            if not shows_path_setting:
-                raise HTTPException(status_code=500, detail="Shows path not configured in settings")
-
-            shows_path = shows_path_setting.value
-            db_show.rename_folder(old_folder_name, shows_path)
+    # If title is updated, update folder_name (contains the show's episodes)
+    if data.title:
+        db_show.update_title(data.title)
 
     if data.seasons is not None:
         seasons = [season.model_dump() for season in data.seasons]
@@ -93,6 +80,8 @@ def delete_show(show_id: int, db: Session = Depends(get_db)):
     show = db.query(ShowModel).filter(ShowModel.id == show_id).first()
     if not show:
         raise HTTPException(status_code=404, detail="Show not found")
+
+    show.delete_folder()
     db.delete(show)
     db.commit()
     return {"ok": True}
@@ -105,22 +94,8 @@ def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(.
     if not episode:
         raise HTTPException(status_code=404, detail="Episode not found")
 
-    season = db.query(SeasonModel).filter(SeasonModel.id == episode.season_id).first()
-    if not season:
-        raise HTTPException(status_code=404, detail="Season not found")
-
-    show = db.query(ShowModel).filter(ShowModel.id == season.show_id).first()
-    if not show:
-        raise HTTPException(status_code=404, detail="Show not found")
-
-    # Load shows_path from settings
-    shows_path_setting = db.query(SettingModel).filter(SettingModel.key == "shows_path").first()
-
-    if not shows_path_setting.value:
-        raise HTTPException(status_code=500, detail="Shows path not configured in settings")
-
     # Attach file to episode model
-    episode.attach_file(file, show.title, season.number, shows_path_setting.value)
+    episode.attach_file(file)
 
     db.commit()
     db.refresh(episode)

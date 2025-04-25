@@ -1,9 +1,11 @@
+import os
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
 
 from models.base import Base
 from models.episode import Episode
+from models.setting import Setting
 
 
 class Season(Base):
@@ -27,8 +29,16 @@ class Season(Base):
             episode_model: Episode = db.query(Episode).filter(Episode.id == id).first()
 
             if episode_model:
+                blacklisted_keys = ["number"]
                 for key, value in episode.items():
+                    if key in blacklisted_keys:
+                        continue
+
                     setattr(episode_model, key, value)
+
+                if "number" in episode:
+                    episode_model.update_number(episode["number"])
+
                 db.add(episode_model)
             else:
                 episode_model = Episode(**episode)
@@ -37,8 +47,6 @@ class Season(Base):
 
             # Sync episodes
             db.flush()
-            if "episodes" in episode:
-                episode_model.sync_episodes(episode["episodes"], db)
 
             # Do not delete the updated/created episode
             if episode_model.id in episode_ids_to_delete:
@@ -51,3 +59,7 @@ class Season(Base):
                 db.delete(episode_to_delete)
 
         db.commit()
+
+    def get_full_folder_path(self) -> str:
+        shows_folder_path = Setting.get_shows_folder_path()
+        return os.path.join(shows_folder_path, self.show.folder_name, f"season_{self.number}")
