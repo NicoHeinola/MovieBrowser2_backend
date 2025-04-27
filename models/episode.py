@@ -62,7 +62,8 @@ class Episode(Base):
         episode_filename = f"{unique_filename}{file_extension}"
         full_save_path = os.path.join(season_directory, episode_filename)
 
-        os.rename(file_path, full_save_path)
+        if file_path and os.path.exists(file_path):
+            os.rename(file_path, full_save_path)
 
         self.filename = episode_filename
 
