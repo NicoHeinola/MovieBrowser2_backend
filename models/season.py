@@ -46,7 +46,7 @@ class Season(Base):
             id = episode.get("id")
             episode_model: Episode = db.query(Episode).filter(Episode.id == id).first()
 
-            blacklisted_keys = ["number"]
+            blacklisted_keys = ["number", "title"]
             if episode_model:
                 for key, value in episode.items():
                     if key in blacklisted_keys:
@@ -59,6 +59,9 @@ class Season(Base):
                 if "number" in episode:
                     episode_model.set_number(episode["number"])
 
+                if "title" in episode:
+                    episode_model.set_title(episode["title"])
+
                 db.add(episode_model)
             else:
                 filtered_episode_data = {k: v for k, v in episode.items() if k not in blacklisted_keys}
@@ -67,6 +70,7 @@ class Season(Base):
                 episode_model.season = self
 
                 episode_model.set_number(episode["number"])
+                episode_model.set_title(episode["title"])
 
                 self.episodes.append(episode_model)
                 db.add(episode_model)

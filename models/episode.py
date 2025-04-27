@@ -7,8 +7,6 @@ from models.base import Base
 
 import os
 
-from models.setting import Setting
-
 
 class Episode(Base):
     __tablename__ = "episodes"
@@ -23,9 +21,14 @@ class Episode(Base):
     season = relationship("Season", back_populates="episodes")
 
     @staticmethod
-    def create_unique_episode_name(episode_number: int) -> str:
+    def create_unique_episode_name(episode_number: int, title: str | None) -> str:
         date_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        return f"episode_{episode_number}_{date_str}"
+
+        safe_title = "no_title"
+        if title:
+            safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title).strip("_").lower()
+
+        return f"episode_{episode_number}_{safe_title}_{date_str}"
 
     def get_full_file_path(self) -> str | None:
         # Get the season folder path
@@ -40,11 +43,17 @@ class Episode(Base):
         full_file_path = os.path.join(season_folder_path, self.filename)
         return full_file_path
 
+    def set_title(self, new_title: str):
+        if new_title == self.title:
+            return
+
+        self.title = new_title
+        self.rename_file()
+
     def set_number(self, new_number: int):
         if new_number == self.number:
             return
 
-        # Update the episode number in the database
         self.number = new_number
         self.rename_file()
 
@@ -58,7 +67,7 @@ class Episode(Base):
 
         file_path: str = self.get_full_file_path()
         file_extension = os.path.splitext(file_path)[1]
-        unique_filename: str = self.create_unique_episode_name(self.number)
+        unique_filename: str = self.create_unique_episode_name(self.number, self.title)
         episode_filename = f"{unique_filename}{file_extension}"
         full_save_path = os.path.join(season_directory, episode_filename)
 
@@ -74,7 +83,7 @@ class Episode(Base):
 
         # Figure out stuff
         file_extension = os.path.splitext(file.filename)[1]
-        unique_filename: str = self.create_unique_episode_name(self.number)
+        unique_filename: str = self.create_unique_episode_name(self.number, self.title)
         episode_filename = f"{unique_filename}{file_extension}"
         full_save_path = os.path.join(season_directory, episode_filename)
 

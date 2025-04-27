@@ -140,4 +140,7 @@ class Show(Base):
         """
         full_folder_path: str = self.get_full_folder_path()
         if full_folder_path and os.path.exists(full_folder_path):
-            shutil.rmtree(full_folder_path)
+            try:
+                shutil.rmtree(full_folder_path)
+            except Exception as e:
+                print(f"Error deleting folder {full_folder_path}: {e}")
