@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -9,7 +9,9 @@ from schemas.show import Show, ShowCreate, ShowUpdate
 from models.show import Show as ShowModel
 from database import get_db
 from models.episode import Episode as EpisodeModel
+from models.season import Season as SeasonModel
 from models.show import Show as ShowModel
+from utils.vlc_media_player_util import VLCMediaPlayerUtil
 
 router = APIRouter()
 
@@ -156,3 +158,50 @@ def upload_episode_file(db: Session = Depends(get_db)):
             print(f"Failed to remove folder {dirpath}: {e}")
 
     return {}
+
+
+@router.post("/{show_id}/episodes/{episode_id}/watch")
+def watch_episode(show_id: int, episode_id: int, db: Session = Depends(get_db)):  # Changed parameters
+    # Fetch the episode using the ID
+    episode = (
+        db.query(EpisodeModel).filter(EpisodeModel.id == episode_id, EpisodeModel.season.has(show_id=show_id)).first()
+    )
+
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found for this show")
+
+    file_path: str = episode.get_full_file_path()
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Episode file not found")
+
+    try:
+        VLCMediaPlayerUtil.open_file(file_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="VLC media player not found on this system.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to open file with VLC: {e}")
+
+    return {"ok": True}
+
+
+@router.post("/{show_id}/seasons/{season_id}/watch")
+def watch_season(
+    show_id: int, season_id: int, db: Session = Depends(get_db)
+):  # Changed parameters and function name for clarity
+    # Fetch the season using the ID
+    season = db.query(SeasonModel).filter(SeasonModel.id == season_id, SeasonModel.show_id == show_id).first()
+    if not season:
+        raise HTTPException(status_code=404, detail="Season not found for this show")
+
+    folder_path: str = season.get_full_folder_path()
+    if not folder_path or not os.path.isdir(folder_path):
+        raise HTTPException(status_code=404, detail="Season folder not found")
+
+    try:
+        VLCMediaPlayerUtil.open_playlist_from_folder(folder_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="VLC media player not found on this system.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to open playlist with VLC: {e}")
+
+    return {"ok": True}

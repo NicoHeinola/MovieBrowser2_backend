@@ -40,7 +40,10 @@ class Episode(Base):
             return None
 
         # Construct the full file path
-        full_file_path = os.path.join(season_folder_path, self.filename)
+        full_file_path: str = os.path.join(season_folder_path, self.filename)
+
+        full_file_path = full_file_path.replace("\\", "/")
+
         return full_file_path
 
     def set_title(self, new_title: str):

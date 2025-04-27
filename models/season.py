@@ -35,7 +35,11 @@ class Season(Base):
         if not show_folder_path:
             return None
 
-        return os.path.join(show_folder_path, self.folder_name)
+        full_path: str = os.path.join(show_folder_path, self.folder_name)
+
+        full_path = full_path.replace("\\", "/")
+
+        return full_path
 
     def sync_episodes(self, episodes_data, db: Session):
         episode_ids_to_delete = set()

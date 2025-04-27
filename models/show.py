@@ -45,7 +45,11 @@ class Show(Base):
         if not shows_folder_path:
             return None
 
-        return os.path.join(shows_folder_path, self.folder_name)
+        full_path: str = os.path.join(shows_folder_path, self.folder_name)
+
+        full_path = full_path.replace("\\", "/")
+
+        return full_path
 
     def sync_seasons(self, seasons_data, db: Session):
 
