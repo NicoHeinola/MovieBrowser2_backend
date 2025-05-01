@@ -22,6 +22,12 @@ A simple backend for managing and browsing shows/movies.
    uvicorn main:app --reload
    ```
 
+   or run main.py directly:
+
+   ```bash
+   python main.py
+   ```
+
 ## Rollback
 
 To rollback the database to the previous migration, run:
