@@ -113,7 +113,7 @@ def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(.
 
 # Removes unused files and folders that may not have been removed due to errors
 @router.post("/cleanup")
-def upload_episode_file(db: Session = Depends(get_db)):
+def cleanup_shows(db: Session = Depends(get_db)):
     shows = db.query(ShowModel).filter().all()
 
     files_to_keep: list = []
@@ -127,10 +127,6 @@ def upload_episode_file(db: Session = Depends(get_db)):
                 if os.path.exists(episode_file_path):
                     files_to_keep.append(episode_file_path)
 
-        show_folder = show.get_full_folder_path()
-        if not os.path.exists(show_folder):
-            continue
-
     base_folder: str = Setting.get_shows_folder_path()
 
     if not base_folder:
@@ -140,8 +136,9 @@ def upload_episode_file(db: Session = Depends(get_db)):
 
     for root, dirs, files in os.walk(base_folder):
         for file in files:
-            file_path = os.path.join(root, file)
+            file_path = os.path.join(root, file).replace("\\", "/")
             ext = os.path.splitext(file)[1][1:].lower()
+
             if file_path not in files_to_keep and ext in removable_file_types:
                 try:
                     os.remove(file_path)
