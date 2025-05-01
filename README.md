@@ -28,6 +28,14 @@ A simple backend for managing and browsing shows/movies.
    python main.py
    ```
 
+## Seeders
+
+To apply seeders, run:
+
+```bash
+python run_seeders.py
+```
+
 ## Rollback
 
 To rollback the database to the previous migration, run:

@@ -4,12 +4,12 @@ from .seeder import Seeder
 
 
 class SettingSeeder(Seeder):
-    def seed(self, json_path="data/settings/default_settings.json"):
+    def seed(self, replace: bool = True, json_path="data/settings/default_settings.json"):
         with open(json_path, "r", encoding="utf-8") as f:
             settings = json.load(f)
         for s in settings:
             existing = self.db.query(SettingModel).filter(SettingModel.key == s["key"]).first()
-            if existing:
+            if existing and replace:
                 existing.value = s["value"]
                 existing.type = s["type"]
             else:
