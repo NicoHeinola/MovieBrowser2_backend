@@ -3,7 +3,7 @@ from fastapi import Request, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from utils.auth import get_user_from_token
+from utils import auth
 
 
 def authenticated_route(func):
@@ -19,7 +19,7 @@ def authenticated_route(func):
         token = auth_header.split(" ")[1]
 
         try:
-            user = await get_user_from_token(token=token, db=db)
+            user = await auth.get_user_from_token(token=token, db=db)
             # Inject the user into the kwargs for the route function
             kwargs["current_user"] = user
         except HTTPException as e:
