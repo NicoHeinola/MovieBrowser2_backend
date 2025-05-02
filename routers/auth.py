@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -38,6 +39,25 @@ async def login_for_access_token(form_data: UserCreate, db: Session = Depends(ge
 
     # Convert user.id to string for the 'sub' claim
     access_token = auth.create_access_token(data={"sub": str(user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/refresh-token", response_model=Token)
+async def refresh_access_token(request: Request, db: Session = Depends(get_db)):
+    token = request.headers.get("Authorization")
+
+    payload = auth.decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    refresh_token_expiration: float = float(payload.get("refresh_token_exp"))
+
+    if refresh_token_expiration is None or datetime.fromtimestamp(refresh_token_expiration) < datetime.now():
+        raise HTTPException(status_code=401, detail="Token expired")
+
+    sub: str = payload.get("sub")
+
+    access_token = auth.create_access_token(data={"sub": str(sub)})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
