@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from middleware.authenticated_route import authenticated_route
@@ -36,11 +36,17 @@ async def login_for_access_token(form_data: UserCreate, db: Session = Depends(ge
             detail="Incorrect username or password",
         )
 
-    access_token = auth.create_access_token(data={"sub": user.id})
+    # Convert user.id to string for the 'sub' claim
+    access_token = auth.create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse)
 @authenticated_route
-def get_current_user(current_user):
+# Remove current_user from parameters, access via request.state.user
+def get_current_user(request: Request, db: Session = Depends(get_db)):
+    current_user = getattr(request.state, "user", None)
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     return current_user
