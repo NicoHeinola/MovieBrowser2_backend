@@ -13,6 +13,7 @@ def upgrade():
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("username", sa.String, nullable=False, unique=True),
         sa.Column("password", sa.String, nullable=False),
+        sa.Column("is_admin", sa.Boolean, default=False),
     )
 
 

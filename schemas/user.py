@@ -12,6 +12,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
+    is_admin: bool = Field(default=False)
 
     class Config:
         from_attributes = True

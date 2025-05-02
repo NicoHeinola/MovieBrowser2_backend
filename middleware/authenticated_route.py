@@ -2,6 +2,7 @@ from functools import wraps
 from fastapi import Request, Depends, HTTPException, status
 from fastapi.background import P
 from sqlalchemy.orm import Session
+import asyncio
 
 from database import get_db
 from models.user import User
@@ -34,6 +35,11 @@ def authenticated_route(func):
                 detail="Error processing token",
             )
 
-        return func(request, db=db, *args, **kwargs)
+        # Await the result if the wrapped function is async
+        result = func(request, db=db, *args, **kwargs)
+        if asyncio.iscoroutine(result):
+            return await result
+        else:
+            return result
 
     return wrapper

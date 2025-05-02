@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 
+from middleware.authenticated_route import authenticated_route
+from middleware.is_admin import is_admin
 from models.setting import Setting
 from schemas.episode import Episode
 from schemas.show import Show, ShowCreate, ShowUpdate
@@ -39,7 +41,9 @@ def read_show(show_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=Show)
-def create_show(data: ShowCreate, db: Session = Depends(get_db)):
+@authenticated_route
+@is_admin
+def create_show(request: Request, data: ShowCreate, db: Session = Depends(get_db)):
     db_show = ShowModel(
         description=data.description,
         image=data.image,
@@ -60,7 +64,9 @@ def create_show(data: ShowCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/{show_id}", response_model=Show)
-def update_show(show_id: int, data: ShowUpdate, db: Session = Depends(get_db)):
+@authenticated_route
+@is_admin
+def update_show(request: Request, show_id: int, data: ShowUpdate, db: Session = Depends(get_db)):
     db_show = db.query(ShowModel).filter(ShowModel.id == show_id).first()
     if not db_show:
         raise HTTPException(status_code=404, detail="Show not found")
@@ -84,7 +90,9 @@ def update_show(show_id: int, data: ShowUpdate, db: Session = Depends(get_db)):
 
 
 @router.delete("/{show_id}")
-def delete_show(show_id: int, db: Session = Depends(get_db)):
+@authenticated_route
+@is_admin
+def delete_show(request: Request, show_id: int, db: Session = Depends(get_db)):
     show = db.query(ShowModel).filter(ShowModel.id == show_id).first()
     if not show:
         raise HTTPException(status_code=404, detail="Show not found")
@@ -96,7 +104,11 @@ def delete_show(show_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/{show_id}/episodes/{episode_id}/file", response_model=Episode)
-def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+@authenticated_route
+@is_admin
+def upload_episode_file(
+    request: Request, show_id: int, episode_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)
+):
 
     episode = db.query(EpisodeModel).filter(EpisodeModel.id == episode_id).first()
     if not episode:
@@ -113,7 +125,9 @@ def upload_episode_file(show_id: int, episode_id: int, file: UploadFile = File(.
 
 # Removes unused files and folders that may not have been removed due to errors
 @router.post("/cleanup")
-def cleanup_shows(db: Session = Depends(get_db)):
+@authenticated_route
+@is_admin
+def cleanup_shows(request: Request, db: Session = Depends(get_db)):
     shows = db.query(ShowModel).filter().all()
 
     files_to_keep: list = []

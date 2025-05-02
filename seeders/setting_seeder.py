@@ -9,7 +9,10 @@ class SettingSeeder(Seeder):
             settings = json.load(f)
         for s in settings:
             existing = self.db.query(SettingModel).filter(SettingModel.key == s["key"]).first()
-            if existing and replace:
+            if existing:
+                if not replace:
+                    continue
+
                 existing.value = s["value"]
                 existing.type = s["type"]
             else:

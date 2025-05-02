@@ -22,6 +22,7 @@ class UserSeeder(Seeder):
 
         admin.password = auth.get_password_hash(ADMIN_PASSWORD)
         admin.username = ADMIN_USERNAME
+        admin.is_admin = True
 
         self.db.add(admin)
         self.db.commit()
