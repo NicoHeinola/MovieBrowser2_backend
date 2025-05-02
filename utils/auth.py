@@ -14,8 +14,6 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRATION_SECONDS = os.getenv("ACCESS_TOKEN_EXPIRATION_SECONDS", 10)
-REFRESH_TOKEN_EXPIRATION_SECONDS = os.getenv("REFRESH_TOKEN_EXPIRATION_SECONDS", 20)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -31,8 +29,14 @@ def get_password_hash(password):
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
 
-    expire = datetime.now() + timedelta(seconds=int(ACCESS_TOKEN_EXPIRATION_SECONDS))
-    refresh_token_expire = datetime.now() + timedelta(seconds=int(REFRESH_TOKEN_EXPIRATION_SECONDS))
+    ACCESS_TOKEN_EXPIRATION_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRATION_SECONDS", 0))
+    REFRESH_TOKEN_EXPIRATION_SECONDS = int(os.getenv("REFRESH_TOKEN_EXPIRATION_SECONDS", 0))
+
+    if ACCESS_TOKEN_EXPIRATION_SECONDS <= 0 or REFRESH_TOKEN_EXPIRATION_SECONDS <= 0:
+        raise ValueError("Token expiration times must be greater than zero.")
+
+    expire = datetime.now() + timedelta(seconds=ACCESS_TOKEN_EXPIRATION_SECONDS)
+    refresh_token_expire = datetime.now() + timedelta(seconds=REFRESH_TOKEN_EXPIRATION_SECONDS)
 
     to_encode.update({"access_token_exp": expire.timestamp(), "refresh_token_exp": refresh_token_expire.timestamp()})
 
