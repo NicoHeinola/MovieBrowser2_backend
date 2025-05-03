@@ -9,7 +9,7 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        "torrent_websites",
+        "websites",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("url", sa.String, nullable=False, unique=True, index=True),
         sa.Column("title", sa.String, nullable=True),
@@ -19,4 +19,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table("torrent_websites")
+    op.drop_table("websites")

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Nyaa (digital)",
+    "url": "https://nyaa.digital/",
+    "description": "A Nyaa mirror.",
+    "tags": ["torrent", "anime", "manga"]
+  },
+  {
+    "name": "Nyaa (iss.ink)",
+    "url": "https://nyaa.iss.ink/",
+    "description": "A Nyaa mirror.",
+    "tags": ["torrent", "anime", "manga"]
+  },
+  {
+    "name": "Nyaa (iss.one)",
+    "url": "https://nyaa.iss.one/",
+    "description": "A Nyaa mirror.",
+    "tags": ["torrent", "anime", "manga"]
+  },
+  {
+    "name": "Nyaa (nyaa.land)",
+    "url": "https://nyaa.land/",
+    "description": "A Nyaa mirror.",
+    "tags": ["torrent", "anime", "manga"]
+  }
+]

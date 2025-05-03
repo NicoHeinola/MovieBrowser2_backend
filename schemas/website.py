@@ -2,14 +2,14 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, ClassVar, Set
 
 
-class TorrentWebsiteBase(BaseModel):
+class WebsiteBase(BaseModel):
     title: str
     description: Optional[str] = None
     url: str
     icon: Optional[str] = None
 
 
-class TorrentWebsiteCreate(TorrentWebsiteBase):
+class WebsiteCreate(WebsiteBase):
     _existing_urls: ClassVar[Set[str]] = set()
 
     @field_validator("url")
@@ -24,7 +24,7 @@ class TorrentWebsiteCreate(TorrentWebsiteBase):
         cls._existing_urls = set(urls)
 
 
-class TorrentWebsiteUpdate(BaseModel):
+class WebsiteUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     url: Optional[str] = None
@@ -44,7 +44,7 @@ class TorrentWebsiteUpdate(BaseModel):
         cls._existing_urls = set(urls)
 
 
-class TorrentWebsite(TorrentWebsiteBase):
+class Website(WebsiteBase):
     id: int
 
     class Config:

@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import shows, settings, auth, torrent_websites
+
+from routers import shows, settings, auth, websites
 import uvicorn
 
 load_dotenv(override=True)
@@ -29,7 +30,8 @@ app.add_middleware(
 app.include_router(shows.router, prefix="/shows")
 app.include_router(settings.router, prefix="/settings")
 app.include_router(auth.router, prefix="/auth")
-app.include_router(torrent_websites.router, prefix="/torrent-websites")
+# Renamed router and prefix
+app.include_router(websites.router, prefix="/websites")
 
 
 @app.get("/")
