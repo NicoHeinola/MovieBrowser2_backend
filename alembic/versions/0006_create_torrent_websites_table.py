@@ -12,9 +12,9 @@ def upgrade():
         "torrent_websites",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("url", sa.String, nullable=False, unique=True, index=True),
-        sa.Column("title", sa.String, nullable=False),
-        sa.Column("icon", sa.String, nullable=False),
-        sa.Column("description", sa.String, nullable=False),
+        sa.Column("title", sa.String, nullable=True),
+        sa.Column("icon", sa.String, nullable=True),
+        sa.Column("description", sa.String, nullable=True),
     )
 
 

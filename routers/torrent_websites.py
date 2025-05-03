@@ -12,14 +12,12 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[TorrentWebsite])
-@authenticated_route
 def read_torrent_websites(request: Request, db: Session = Depends(get_db)):
     torrent_websites = db.query(TorrentWebsiteModel).all()
     return torrent_websites
 
 
 @router.get("/{id}", response_model=TorrentWebsite)
-@authenticated_route
 def read_torrent_website(request: Request, id: int, db: Session = Depends(get_db)):
     torrent_website = db.query(TorrentWebsiteModel).filter(TorrentWebsiteModel.id == id).first()
 
