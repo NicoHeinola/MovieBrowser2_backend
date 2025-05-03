@@ -36,8 +36,18 @@ def create_website(request: Request, data: WebsiteCreate, db: Session = Depends(
     if db.query(WebsiteModel).filter(WebsiteModel.url == url).first():
         raise HTTPException(status_code=400, detail="URL already exists")
 
-    website = WebsiteModel(**data.model_dump())
+    website = WebsiteModel(
+        title=data.title,
+        description=data.description,
+        url=data.url,
+        icon=data.icon,
+    )
     db.add(website)
+    db.flush()  # get website.id for tags
+
+    if data.tags:
+        website.sync_tags(data.tags, db)
+
     db.commit()
     db.refresh(website)
 
@@ -54,9 +64,13 @@ def update_website(request: Request, id: int, data: WebsiteUpdate, db: Session =
         raise HTTPException(status_code=404, detail="Website not found")
 
     update_data = data.model_dump(exclude_unset=True)
+    tags = update_data.pop("tags", None)
 
     for k, v in update_data.items():
         setattr(website, k, v)
+
+    if tags is not None:
+        website.sync_tags(tags, db)
 
     db.commit()
     db.refresh(website)

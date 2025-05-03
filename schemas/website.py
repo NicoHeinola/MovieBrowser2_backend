@@ -1,5 +1,7 @@
 from pydantic import BaseModel, field_validator
-from typing import Optional, ClassVar, Set
+from typing import Optional, ClassVar, Set, List
+
+from schemas.website_tag import WebsiteTag
 
 
 class WebsiteBase(BaseModel):
@@ -7,6 +9,7 @@ class WebsiteBase(BaseModel):
     description: Optional[str] = None
     url: str
     icon: Optional[str] = None
+    tags: Optional[List[WebsiteTag]] = None
 
 
 class WebsiteCreate(WebsiteBase):
@@ -29,6 +32,7 @@ class WebsiteUpdate(BaseModel):
     description: Optional[str] = None
     url: Optional[str] = None
     icon: Optional[str] = None
+    tags: Optional[List[WebsiteTag]] = None
 
     _existing_urls: ClassVar[Set[str]] = set()
 
