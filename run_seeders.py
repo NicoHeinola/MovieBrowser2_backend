@@ -1,7 +1,10 @@
+from dotenv import load_dotenv
 from database import SessionLocal
 from seeders.setting_seeder import SettingSeeder
 from seeders.user_seeder import UserSeeder
 from sqlalchemy.orm import Session
+
+load_dotenv(override=True)
 
 
 def run_seeders(db: Session):

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import shows, settings, auth
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI()

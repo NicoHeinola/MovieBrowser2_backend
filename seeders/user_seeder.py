@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 from models.user import User
 from seeders.seeder import Seeder
 from utils import auth
-
-load_dotenv()
 
 
 class UserSeeder(Seeder):
