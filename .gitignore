@@ -27,3 +27,6 @@ Thumbs.db
 
 # VSCode settings
 .vscode/
+
+*.err
+*.log
