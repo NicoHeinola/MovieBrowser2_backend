@@ -18,10 +18,10 @@ class WebsiteSeeder(Seeder):
                 existing.description = w.get("description")
                 existing.icon = w.get("icon")
                 existing.url = w.get("url")
-                existing.sync_tags(tags)
+                existing.sync_tags(tags, self.db)
             else:
                 website = WebsiteModel(**w_data)
                 self.db.add(website)
                 self.db.flush()
-                website.sync_tags(tags)
+                website.sync_tags(tags, self.db)
         self.db.commit()
