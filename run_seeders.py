@@ -1,3 +1,4 @@
+import traceback
 from dotenv import load_dotenv
 from database import SessionLocal
 from seeders.setting_seeder import SettingSeeder
@@ -27,6 +28,6 @@ if __name__ == "__main__":
         run_seeders(db)
         print("Seeders finished.")
     except Exception as e:
-        print(f"Seeding failed: {e}")
+        print(f"Seeding failed: {traceback.format_exc()}")
     finally:
         db.close()
