@@ -42,7 +42,7 @@ echo To stop the server, you may need to find and kill the Uvicorn/Python proces
 
 REM Start Uvicorn in the background
 REM Ensure uvicorn is installed (pip install uvicorn[standard]) if not in requirements.txt
-start "MovieBrowserBackend" /B python -m uvicorn main:app --host 0.0.0.0 --port 8000
+start "MovieBrowserBackend" /B pythonw -m uvicorn main:app --host 0.0.0.0 --port 8000
 
 if errorlevel 1 (
     echo ERROR: Failed to start Uvicorn.
