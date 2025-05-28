@@ -6,6 +6,8 @@ This guide will help you run the MovieBrowser backend in Docker and set it up to
 
 1. Install Docker Desktop for Windows from: https://www.docker.com/products/docker-desktop/
 2. Make sure Docker Desktop is set to start on boot (Docker Desktop Settings > General > "Start Docker Desktop when you log in")
+3. Enable WSL2 integration in Docker Desktop (Settings > Resources > WSL Integration)
+4. Ensure your F: drive is accessible in WSL2 (it should be mounted at `/mnt/f`)
 
 ## Quick Start
 
@@ -114,5 +116,75 @@ The following directories are mounted to persist data:
 
 - `./database_instance` - SQLite database files
 - `./data` - Application data and seeders
+- `/mnt/f` (F: drive) - Video files for upload and streaming (mounted at `/app/videos` inside container)
 
 Your data will persist even if you recreate the container.
+
+## F: Drive Access for Videos
+
+The container is configured to mount your F: drive for video storage and access:
+
+### WSL2 Setup
+
+1. Ensure WSL2 is properly configured with Docker Desktop
+2. Your F: drive should automatically be available at `/mnt/f` in WSL2
+3. The container mounts `/mnt/f` to `/app/videos` for video access
+
+### Verifying F: Drive Access
+
+To verify F: drive is accessible in WSL2:
+
+```bash
+# From WSL2 terminal
+ls /mnt/f
+```
+
+To test inside the Docker container:
+
+```bash
+# Check if F: drive is mounted in container
+docker-compose exec moviebrowser-backend ls /app/videos
+
+# Or start a shell inside the container
+docker-compose exec moviebrowser-backend /bin/bash
+```
+
+### Video Path Configuration
+
+- Environment variable: `VIDEO_STORAGE_PATH=/app/videos`
+- Container path: `/app/videos` (maps to your F: drive)
+- You can modify the volume mount in `docker-compose.yml` to use specific subdirectories:
+  ```yaml
+  volumes:
+    - /mnt/f/Movies:/app/videos/movies
+    - /mnt/f/TV_Shows:/app/videos/tv_shows
+  ```
+
+### Troubleshooting F: Drive Access
+
+1. **F: drive not visible in WSL2:**
+
+   ```bash
+   # Check mounted drives
+   mount | grep /mnt/
+
+   # If F: drive is missing, try remounting
+   sudo mkdir -p /mnt/f
+   sudo mount -t drvfs F: /mnt/f
+   ```
+
+2. **Permission issues:**
+
+   ```bash
+   # Check permissions
+   ls -la /mnt/f
+
+   # If needed, you can add the following to docker-compose.yml
+   user: "1000:1000"  # Adjust UID:GID as needed
+   ```
+
+3. **Container can't access videos:**
+   ```bash
+   # Check if volume is properly mounted
+   docker-compose exec moviebrowser-backend df -h
+   ```

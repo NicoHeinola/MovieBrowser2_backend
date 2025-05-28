@@ -5,13 +5,16 @@ services:
     build: .
     container_name: moviebrowser-backend
     ports:
-      - "8000:8000"
-    volumes:
+      - "8000:8000"    volumes:
       # Mount the database directory to persist data
       - ./database_instance:/app/database_instance
       # Mount the data directory for seeders
       - ./data:/app/data
-    environment:
+      # Mount F: drive for video uploads and access (WSL path)
+      - /mnt/f:/app/videos
+      # Optional: Mount a specific subdirectory if you prefer
+      # - /mnt/f/Movies:/app/videos/movies
+      # - /mnt/f/TV_Shows:/app/videos/tv_shows    environment:
       - ENVIRONMENT=production
       - SQLALCHEMY_DATABASE_URL=sqlite:///./database_instance/database.db
       - SECRET_KEY=your-secret-key-change-this
@@ -19,6 +22,8 @@ services:
       - REFRESH_TOKEN_EXPIRATION_SECONDS=604800
       - ADMIN_PASSWORD=admin
       - ADMIN_USERNAME=admin
+      # Video storage path inside container
+      - VIDEO_STORAGE_PATH=/app/videos
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
