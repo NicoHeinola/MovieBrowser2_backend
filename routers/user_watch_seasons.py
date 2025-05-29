@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[UserWatchSeasonSchema])
 @authenticated_route
-async def get_user_watch_seasons(
+async def read_user_watch_seasons(
     request: Request, show_id: Optional[int] = None, season_id: Optional[int] = None, db: Session = Depends(get_db)
 ):
     user = request.state.user

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from middleware.authenticated_route import authenticated_route
 from middleware.is_admin import is_admin
@@ -8,13 +8,38 @@ from schemas.website import Website, WebsiteCreate, WebsiteUpdate
 from models.website import Website as WebsiteModel
 from database import get_db
 from seeders.website_seeder import WebsiteSeeder
+from sqlalchemy import or_
+from models.website_tag import WebsiteTag  # Added import
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[Website])
-def read_websites(request: Request, db: Session = Depends(get_db)):
-    websites = db.query(WebsiteModel).all()
+def read_websites(
+    request: Request,
+    db: Session = Depends(get_db),
+    tags: Optional[str] = None,
+    description: Optional[str] = None,
+    title: Optional[str] = None,
+):
+    query = db.query(WebsiteModel)
+
+    if tags:
+        tag_list = [tag.strip() for tag in tags.split(",")]
+
+        # Build an OR query so that any tag match is sufficient
+
+        tag_filters = [WebsiteTag.name.ilike(f"%{tag}%") for tag in tag_list]
+        if tag_filters:
+            query = query.join(WebsiteModel.tags).filter(or_(*tag_filters))
+
+    if description:
+        query = query.filter(WebsiteModel.description.ilike(f"%{description}%"))
+
+    if title:
+        query = query.filter(WebsiteModel.title.ilike(f"%{title}%"))
+
+    websites = query.all()
     return websites
 
 
