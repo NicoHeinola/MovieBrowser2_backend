@@ -7,6 +7,7 @@ from middleware.is_admin import is_admin
 from schemas.website import Website, WebsiteCreate, WebsiteUpdate
 from models.website import Website as WebsiteModel
 from database import get_db
+from seeders.website_seeder import WebsiteSeeder
 
 router = APIRouter()
 
@@ -91,3 +92,14 @@ def delete_website(request: Request, id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return website
+
+
+@router.post("/seed")
+@authenticated_route
+@is_admin
+def seed_websites_route(request: Request, db: Session = Depends(get_db)):
+    """
+    Seed/update websites from the default JSON file.
+    """
+    WebsiteSeeder(db).seed()
+    return {"ok": True, "message": "Websites seeded from default_websites.json"}
