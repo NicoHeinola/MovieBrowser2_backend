@@ -1,4 +1,3 @@
-from typing import List
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, Session
 from models.base import Base
@@ -16,14 +15,14 @@ class Website(Base):
 
     tags = relationship("WebsiteTag", cascade="all, delete-orphan", backref="website")
 
-    def sync_tags(self, tags: List[WebsiteTag], db: Session):
+    def sync_tags(self, tags: list, db: Session):
         existing_tags_map = {tag.name: tag for tag in self.tags}
         tag_ids_to_delete = {tag.id for tag in self.tags}
 
         processed_tag_ids = set()
 
         for tag in tags:
-            tag_name = tag.get("name")
+            tag_name = tag.name if hasattr(tag, "name") else tag.get("name")
             tag_model = existing_tags_map.get(tag_name)
 
             if tag_model:

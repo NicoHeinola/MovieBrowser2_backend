@@ -69,7 +69,7 @@ def create_website(request: Request, data: WebsiteCreate, db: Session = Depends(
         icon=data.icon,
     )
     db.add(website)
-    db.flush()  # get website.id for tags
+    db.commit()
 
     if data.tags:
         website.sync_tags(data.tags, db)
