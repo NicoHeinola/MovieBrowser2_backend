@@ -26,9 +26,11 @@ class Episode(Base):
 
         safe_title = "no_title"
         if title:
-            safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title).strip("_").lower()
+            safe_title = re.sub(r"[^a-zA-Z]", "_", title).strip("_").lower()
 
-        return f"episode_{episode_number}_{safe_title}_{date_str}"
+        formatted_number: str = f"{episode_number:03d}"
+
+        return f"ep_{formatted_number}_{safe_title}_date_{date_str}_ep_{formatted_number}"
 
     def get_full_file_path(self) -> str | None:
         # Get the season folder path
