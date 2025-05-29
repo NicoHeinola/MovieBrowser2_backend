@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 
-from middleware.authenticated_route import authenticated_route
+from middleware.authenticated_route import authenticated_route, optionally_authenticated_route
 from middleware.is_admin import is_admin
 from models.setting import Setting
+from models.user import User
+from models.user_watch_season import UserWatchSeason
 from schemas.episode import Episode
 from schemas.show import Show, ShowCreate, ShowUpdate
 from models.show import Show as ShowModel
@@ -196,9 +198,8 @@ def watch_episode(show_id: int, episode_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/{show_id}/seasons/{season_id}/watch")
-def watch_season(
-    show_id: int, season_id: int, db: Session = Depends(get_db)
-):  # Changed parameters and function name for clarity
+@optionally_authenticated_route
+def watch_season(request: Request, show_id: int, season_id: int, db: Session = Depends(get_db)):
     # Fetch the season using the ID
     season = db.query(SeasonModel).filter(SeasonModel.id == season_id, SeasonModel.show_id == show_id).first()
     if not season:
@@ -207,6 +208,19 @@ def watch_season(
     folder_path: str = season.get_full_folder_path()
     if not folder_path or not os.path.isdir(folder_path):
         raise HTTPException(status_code=404, detail="Season folder not found")
+
+    user: User = request.state.user if hasattr(request.state, "user") else None
+
+    # Save last watched season in the database and remove old one
+    if user:
+        db.query(UserWatchSeason).filter(
+            UserWatchSeason.user_id == user.id,
+            UserWatchSeason.show_id == show_id,
+        ).delete()
+
+        new_user_watch_season = UserWatchSeason(season_id=season_id, user_id=user.id, show_id=show_id)
+        db.add(new_user_watch_season)
+        db.commit()
 
     try:
         VLCMediaPlayerUtil.open_playlist_from_folder(folder_path)

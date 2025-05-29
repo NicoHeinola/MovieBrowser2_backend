@@ -9,6 +9,30 @@ from models.user import User
 from utils import auth
 
 
+def optionally_authenticated_route(func):
+    """
+    A decorator to optionally authenticate a route.
+    If the user is authenticated, they will be added to the request state.
+    If not authenticated, the request will still proceed without raising an error.
+    """
+
+    @wraps(func)
+    async def wrapper(request: Request, db: Session = Depends(get_db), *args, **kwargs):
+
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            return await authenticated_route(func)(request, db=db, *args, **kwargs)
+        else:
+            # Await the result if the wrapped function is async
+            result = func(request, db=db, *args, **kwargs)
+            if asyncio.iscoroutine(result):
+                return await result
+            else:
+                return result
+
+    return wrapper
+
+
 def authenticated_route(func):
 
     @wraps(func)

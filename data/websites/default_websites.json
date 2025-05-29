@@ -3,83 +3,104 @@
     "title": "Nyaa (digital)",
     "url": "https://nyaa.digital/",
     "description": "A Nyaa mirror.",
+    "icon": "mdi-cat",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "manga" }]
   },
   {
     "title": "Nyaa (iss.ink)",
     "url": "https://nyaa.iss.ink/",
     "description": "A Nyaa mirror.",
+    "icon": "mdi-cat",
+    "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "manga" }]
+  },
+  {
+    "title": "Nyaa (iss.ink)",
+    "url": "https://nyaa.iss.ink/",
+    "description": "A Nyaa mirror.",
+    "icon": "mdi-cat",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "manga" }]
   },
   {
     "title": "Nyaa (iss.one)",
     "url": "https://nyaa.iss.one/",
     "description": "A Nyaa mirror.",
+    "icon": "mdi-cat",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "manga" }]
   },
   {
     "title": "Nyaa (nyaa.land)",
     "url": "https://nyaa.land/",
     "description": "A Nyaa mirror.",
+    "icon": "mdi-cat",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "manga" }]
   },
   {
     "title": "1337x",
     "url": "https://1337x.to/",
     "description": "Popular torrent site for movies, TV shows, anime, and more.",
+    "icon": "mdi-movie-roll",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "tv" }, { "name": "movies" }]
   },
   {
     "title": "The Pirate Bay",
     "url": "https://thepiratebay.org/",
+    "icon": "mdi-pirate",
     "description": "One of the oldest and most well-known torrent sites.",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "tv" }, { "name": "movies" }]
   },
   {
     "title": "RARBG",
     "url": "https://rarbg.to/",
+    "icon": "mdi-movie-roll",
     "description": "Popular for high-quality torrents of movies and TV shows.",
     "tags": [{ "name": "torrent" }, { "name": "tv" }, { "name": "movies" }]
   },
   {
     "title": "AnimeTosho",
     "url": "https://animetosho.org/",
+    "icon": "mdi-cat",
     "description": "Anime-focused torrent aggregator.",
     "tags": [{ "name": "torrent" }, { "name": "anime" }]
   },
   {
     "title": "Tokyo Toshokan",
     "url": "https://tokyotosho.info/",
+    "icon": "mdi-cat",
     "description": "Japanese media-focused torrent index.",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "japanese" }]
   },
   {
     "title": "EZTV",
     "url": "https://eztv.re/",
+    "icon": "mdi-television",
     "description": "Specializes in TV show torrents.",
     "tags": [{ "name": "torrent" }, { "name": "tv" }]
   },
   {
     "title": "TorrentGalaxy",
     "url": "https://torrentgalaxy.to/",
+    "icon": "mdi-television",
     "description": "General torrent site with TV, movies, and anime.",
     "tags": [{ "name": "torrent" }, { "name": "tv" }, { "name": "movies" }, { "name": "anime" }]
   },
   {
     "title": "LimeTorrents",
     "url": "https://www.limetorrents.info/",
+    "icon": "mdi-television",
     "description": "General torrent site with a good selection of anime and TV shows.",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "tv" }, { "name": "movies" }]
   },
   {
     "title": "SubsPlease",
     "url": "https://subsplease.org/shows/",
+    "icon": "mdi-television",
     "description": "Focuses on currently airing anime, offering torrents and XDCC.",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "nyaa-replacement" }]
   },
   {
     "title": "HorribleSubs (Archive - No longer active but archives exist)",
     "url": "https://horriblesubs.info/",
+    "icon": "mdi-television",
     "description": "Formerly a popular source for anime torrents. Archives may still be accessible.",
     "tags": [{ "name": "torrent" }, { "name": "anime" }, { "name": "archive" }]
   }
