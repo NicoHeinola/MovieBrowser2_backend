@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import shows, settings, auth, websites, user_watch_seasons
+from routers import shows, settings, auth, user_show_statuses, websites, user_watch_seasons
 import uvicorn
 
 load_dotenv(override=True)
@@ -32,6 +32,7 @@ app.include_router(settings.router, prefix="/settings")
 app.include_router(auth.router, prefix="/auth")
 app.include_router(websites.router, prefix="/websites")
 app.include_router(user_watch_seasons.router, prefix="/user-watch-seasons")
+app.include_router(user_show_statuses.router, prefix="/user-show-statuses")
 
 
 @app.get("/")

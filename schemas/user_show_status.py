@@ -2,7 +2,10 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class UserWatchSeason(BaseModel):
+class UserShowStatus(BaseModel):
     id: Optional[int] = None
-    season_id: int
     show_id: int
+    status: str
+
+    class Config:
+        orm_mode = True
