@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from .season import Season  # Import Season from new file
+from .show_category import ShowCategory
 
 
 class ShowBase(BaseModel):
@@ -9,6 +10,7 @@ class ShowBase(BaseModel):
     description: Optional[str] = None
     image: Optional[str] = None
     seasons: List[Season] = []
+    categories: Optional[List[ShowCategory]] = None
 
 
 class ShowCreate(ShowBase):

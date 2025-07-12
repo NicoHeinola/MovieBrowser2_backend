@@ -43,6 +43,10 @@ def read_shows(request: Request, db: Session = Depends(get_db)):
         user_show_statuses = parsed_params["userShowStatus:notIn"]
         query = ShowModel.filterByUserShowStatusNotIn(query, user.id, user_show_statuses)
 
+    # Handle categories filter
+    if "categories:anyIn" in parsed_params and parsed_params["categories:anyIn"]:
+        query = ShowModel.filterByCategoriesAnyIn(query, parsed_params["categories:anyIn"])
+
     shows = query.all()
 
     return shows
@@ -74,6 +78,10 @@ def create_show(request: Request, data: ShowCreate, db: Session = Depends(get_db
         seasons = [season.model_dump() for season in data.seasons]
         db_show.sync_seasons(seasons, db)
 
+    if data.categories is not None:
+        categories = [category.model_dump() for category in data.categories]
+        db_show.sync_categories(categories, db)
+
     db.commit()
     db.refresh(db_show)
     return db_show
@@ -87,7 +95,7 @@ def update_show(request: Request, show_id: int, data: ShowUpdate, db: Session = 
     if not db_show:
         raise HTTPException(status_code=404, detail="Show not found")
 
-    update_data = data.model_dump(exclude={"seasons", "title"})
+    update_data = data.model_dump(exclude={"seasons", "title", "categories"})
 
     for key, value in update_data.items():
         setattr(db_show, key, value)
@@ -99,6 +107,10 @@ def update_show(request: Request, show_id: int, data: ShowUpdate, db: Session = 
     if data.seasons is not None:
         seasons = [season.model_dump() for season in data.seasons]
         db_show.sync_seasons(seasons, db)
+
+    if data.categories is not None:
+        categories = [category.model_dump() for category in data.categories]
+        db_show.sync_categories(categories, db)
 
     db.commit()
     db.refresh(db_show)

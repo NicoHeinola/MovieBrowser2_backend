@@ -10,8 +10,10 @@ from models.user_show_status import UserShowStatus
 from models.base import Base
 from models.season import Season
 from models.setting import Setting
+from models.show_category import ShowCategory
 import shutil
 from sqlalchemy.orm import aliased
+from sqlalchemy import or_
 
 
 class Show(Base):
@@ -23,6 +25,7 @@ class Show(Base):
     folder_name = Column(String, nullable=False)
     seasons = relationship("Season", back_populates="show", cascade="all, delete-orphan")
     user_show_statuses = relationship("UserShowStatus", back_populates="show", cascade="all, delete-orphan")
+    categories = relationship("ShowCategory", cascade="all, delete-orphan", backref="show")
 
     @staticmethod
     def create_unique_folder_safe_name(title: str) -> str:
@@ -66,6 +69,23 @@ class Show(Base):
 
         # Join with UserShowStatus table and filter by user_id and status
         return query.join(uss_not_in).filter(uss_not_in.user_id == user_id, uss_not_in.status.notin_(valid_statuses))
+
+    @staticmethod
+    def filterByCategoriesAnyIn(query: Query, categories: list[str]):
+        if not categories:
+            return query
+
+        # Filter out None values that might come from empty query parameters
+        valid_categories = [category for category in categories if category is not None]
+
+        if not valid_categories:
+            return query
+
+        # Create filter conditions for categories
+        category_filters = [ShowCategory.name.ilike(f"%{category}%") for category in valid_categories]
+
+        # Join with ShowCategory table and filter by category names
+        return query.join(ShowCategory).filter(or_(*category_filters))
 
     def __init__(self, *args, **kwargs):
         if "title" in kwargs and "folder_name" not in kwargs:
@@ -148,6 +168,37 @@ class Show(Base):
             db.delete(season_to_delete)
 
         db.commit()
+
+    def sync_categories(self, categories: list, db: Session):
+        existing_categories_map = {category.name: category for category in self.categories}
+        category_ids_to_delete = {category.id for category in self.categories}
+
+        processed_category_ids = set()
+
+        for category in categories:
+            category_name = category.name if hasattr(category, "name") else category.get("name")
+            category_model = existing_categories_map.get(category_name)
+
+            if category_model:
+                processed_category_ids.add(category_model.id)
+            else:
+                new_category = ShowCategory(name=category_name, show_id=self.id)
+                db.add(new_category)
+
+        ids_to_actually_delete = category_ids_to_delete - processed_category_ids
+
+        if ids_to_actually_delete:
+            categories_to_remove = (
+                db.query(ShowCategory)
+                .filter(
+                    ShowCategory.show_id == self.id,  # Ensure deletion is scoped to this show
+                    ShowCategory.id.in_(ids_to_actually_delete),
+                )
+                .all()
+            )
+
+            for category_to_remove in categories_to_remove:
+                db.delete(category_to_remove)
 
     def set_title(self, new_title: str):
         """
