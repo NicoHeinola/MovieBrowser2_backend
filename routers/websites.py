@@ -26,8 +26,6 @@ def read_websites(
 
     query = db.query(WebsiteModel)
 
-    print("Parsed query parameters:", parsed_params)
-
     if "tags" in parsed_params and parsed_params["tags"]:
         tag_filters = [WebsiteTag.name.ilike(f"%{tag}%") for tag in parsed_params["tags"]]
         if tag_filters:

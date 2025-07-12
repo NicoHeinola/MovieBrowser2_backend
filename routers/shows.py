@@ -27,9 +27,6 @@ def read_shows(request: Request, db: Session = Depends(get_db)):
     # Get parsed query parameters using the middleware
     parsed_params = get_parsed_query_params(request)
 
-    # Debug: Print both old and new format for comparison
-    print("Search params:", parsed_params)
-
     query = db.query(ShowModel)
 
     # Use the parsed parameters instead of raw query params
