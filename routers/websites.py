@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from middleware.authenticated_route import authenticated_route
 from middleware.is_admin import is_admin
+from middleware.query_parser import get_parsed_query_params
 from schemas.website import Website, WebsiteCreate, WebsiteUpdate
 from models.website import Website as WebsiteModel
 from database import get_db
@@ -18,26 +19,25 @@ router = APIRouter()
 def read_websites(
     request: Request,
     db: Session = Depends(get_db),
-    tags: Optional[str] = None,
     description: Optional[str] = None,
     title: Optional[str] = None,
 ):
+    parsed_params = get_parsed_query_params(request)
+
     query = db.query(WebsiteModel)
 
-    if tags:
-        tag_list = [tag.strip() for tag in tags.split(",")]
+    print("Parsed query parameters:", parsed_params)
 
-        # Build an OR query so that any tag match is sufficient
-
-        tag_filters = [WebsiteTag.name.ilike(f"%{tag}%") for tag in tag_list]
+    if "tags" in parsed_params and parsed_params["tags"]:
+        tag_filters = [WebsiteTag.name.ilike(f"%{tag}%") for tag in parsed_params["tags"]]
         if tag_filters:
             query = query.join(WebsiteModel.tags).filter(or_(*tag_filters))
 
-    if description:
-        query = query.filter(WebsiteModel.description.ilike(f"%{description}%"))
+    if "description" in parsed_params and parsed_params["description"]:
+        query = query.filter(WebsiteModel.description.ilike(f"%{parsed_params['description']}%"))
 
-    if title:
-        query = query.filter(WebsiteModel.title.ilike(f"%{title}%"))
+    if "title" in parsed_params and parsed_params["title"]:
+        query = query.filter(WebsiteModel.title.ilike(f"%{parsed_params['title']}%"))
 
     websites = query.all()
     return websites

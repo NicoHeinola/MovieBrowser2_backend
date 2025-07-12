@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from middleware.query_parser import QueryParserMiddleware
 from routers import shows, settings, auth, user_show_statuses, websites, user_watch_seasons
 import uvicorn
 
@@ -10,6 +11,9 @@ load_dotenv(override=True)
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI()
+
+# Query Parser Middleware - Add this before CORS to parse query params early
+app.add_middleware(QueryParserMiddleware)
 
 # CORS Middleware Configuration
 origins = [

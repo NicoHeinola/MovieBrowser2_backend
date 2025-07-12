@@ -5,11 +5,13 @@ from sqlalchemy.orm import Session
 import os
 import re
 from sqlalchemy.orm import Query
+from models.user_show_status import UserShowStatus
 
 from models.base import Base
 from models.season import Season
 from models.setting import Setting
 import shutil
+from sqlalchemy.orm import aliased
 
 
 class Show(Base):
@@ -20,6 +22,7 @@ class Show(Base):
     image = Column(String, nullable=True)
     folder_name = Column(String, nullable=False)
     seasons = relationship("Season", back_populates="show", cascade="all, delete-orphan")
+    user_show_statuses = relationship("UserShowStatus", back_populates="show", cascade="all, delete-orphan")
 
     @staticmethod
     def create_unique_folder_safe_name(title: str) -> str:
@@ -31,6 +34,38 @@ class Show(Base):
     def filterBySearch(query: Query, search_text: str):
         query = query.filter(Show.title.like(f"%{search_text}%"))
         return query
+
+    @staticmethod
+    def filterByUserShowStatusIn(query: Query, user_id: int, user_show_statuses: list[str]):
+        if not user_show_statuses:
+            return query
+
+        # Filter out None values that might come from empty query parameters
+        valid_statuses = [status for status in user_show_statuses if status is not None]
+
+        if not valid_statuses:
+            return query
+
+        uss_in = aliased(UserShowStatus)
+
+        # Join with UserShowStatus table and filter by user_id and status
+        return query.join(uss_in).filter(uss_in.user_id == user_id, uss_in.status.in_(valid_statuses))
+
+    @staticmethod
+    def filterByUserShowStatusNotIn(query: Query, user_id: int, user_show_statuses: list[str]):
+        if not user_show_statuses:
+            return query
+
+        # Filter out None values that might come from empty query parameters
+        valid_statuses = [status for status in user_show_statuses if status is not None]
+
+        if not valid_statuses:
+            return query
+
+        uss_not_in = aliased(UserShowStatus)
+
+        # Join with UserShowStatus table and filter by user_id and status
+        return query.join(uss_not_in).filter(uss_not_in.user_id == user_id, uss_not_in.status.notin_(valid_statuses))
 
     def __init__(self, *args, **kwargs):
         if "title" in kwargs and "folder_name" not in kwargs:

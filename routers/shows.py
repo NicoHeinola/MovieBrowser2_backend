@@ -5,6 +5,7 @@ from typing import List
 
 from middleware.authenticated_route import authenticated_route, optionally_authenticated_route
 from middleware.is_admin import is_admin
+from middleware.query_parser import get_parsed_query_params
 from models.setting import Setting
 from models.user import User
 from models.user_watch_season import UserWatchSeason
@@ -21,13 +22,29 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[Show])
+@authenticated_route
 def read_shows(request: Request, db: Session = Depends(get_db)):
-    query_params = request.query_params
+    # Get parsed query parameters using the middleware
+    parsed_params = get_parsed_query_params(request)
+
+    # Debug: Print both old and new format for comparison
+    print("Search params:", parsed_params)
 
     query = db.query(ShowModel)
 
-    if "search[search]" in query_params:
-        query = ShowModel.filterBySearch(query, query_params.get("search[search]"))
+    # Use the parsed parameters instead of raw query params
+    if "search" in parsed_params and parsed_params["search"]:
+        query = ShowModel.filterBySearch(query, parsed_params["search"])
+
+    # Example: Handle userShowStatus filter if it exists
+    user: User = request.state.user if hasattr(request.state, "user") else None
+    if "userShowStatus:in" in parsed_params and user:
+        user_show_statuses = parsed_params["userShowStatus:in"]
+        query = ShowModel.filterByUserShowStatusIn(query, user.id, user_show_statuses)
+
+    if "userShowStatus:notIn" in parsed_params and user:
+        user_show_statuses = parsed_params["userShowStatus:notIn"]
+        query = ShowModel.filterByUserShowStatusNotIn(query, user.id, user_show_statuses)
 
     shows = query.all()
 
