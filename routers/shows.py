@@ -10,18 +10,20 @@ from models.setting import Setting
 from models.user import User
 from models.user_watch_season import UserWatchSeason
 from schemas.episode import Episode
+from schemas.paginated_response import PaginatedResponse
 from schemas.show import Show, ShowCreate, ShowUpdate
 from models.show import Show as ShowModel
 from database import get_db
 from models.episode import Episode as EpisodeModel
 from models.season import Season as SeasonModel
 from models.show import Show as ShowModel
+from utils.pagination import paginate_query
 from utils.vlc_media_player_util import VLCMediaPlayerUtil
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[Show])
+@router.get("/", response_model=PaginatedResponse)
 @authenticated_route
 def read_shows(request: Request, db: Session = Depends(get_db)):
     # Get parsed query parameters using the middleware
@@ -47,9 +49,12 @@ def read_shows(request: Request, db: Session = Depends(get_db)):
     if "categories:anyIn" in parsed_params and parsed_params["categories:anyIn"]:
         query = ShowModel.filterByCategoriesAnyIn(query, parsed_params["categories:anyIn"])
 
-    shows = query.all()
+    paginated = paginate_query(query, parsed_params.get("page", 1), parsed_params.get("limit", 10))
 
-    return shows
+    # Serialize ORM objects to Pydantic models
+    paginated["data"] = [Show.model_validate(item, from_attributes=True) for item in paginated["data"]]
+
+    return paginated
 
 
 @router.get("/{show_id}", response_model=Show)
