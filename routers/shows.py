@@ -145,6 +145,8 @@ def upload_episode_file(
     # Attach file to episode model
     episode.attach_file(file)
 
+    episode.update_file_size_bytes()
+
     db.commit()
     db.refresh(episode)
 

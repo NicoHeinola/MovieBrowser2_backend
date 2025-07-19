@@ -7,5 +7,6 @@ class Episode(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     number: int
-    type: Optional[str] = None  # New field added
-    filename: Optional[str] = None  # New field for file name
+    type: Optional[str] = None
+    filename: Optional[str] = None
+    file_size_bytes: Optional[int] = None

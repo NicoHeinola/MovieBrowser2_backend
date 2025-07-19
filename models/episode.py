@@ -16,8 +16,10 @@ class Episode(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     number = Column(Integer, nullable=False)
-    type = Column(String, nullable=True)  # New column added
-    filename = Column(String, nullable=True)  # New column for file name
+    type = Column(String, nullable=True)
+    filename = Column(String, nullable=True)
+    file_size_bytes = Column(Integer, nullable=True)
+
     season = relationship("Season", back_populates="episodes")
 
     @staticmethod
@@ -47,6 +49,13 @@ class Episode(Base):
         full_file_path = full_file_path.replace("\\", "/")
 
         return full_file_path
+
+    def update_file_size_bytes(self):
+        full_file_path: str = self.get_full_file_path()
+        if full_file_path and os.path.exists(full_file_path):
+            self.file_size_bytes = os.path.getsize(full_file_path)
+        else:
+            self.file_size_bytes = 0
 
     def set_title(self, new_title: str):
         if new_title == self.title:

@@ -50,34 +50,26 @@ class Season(Base):
             id = episode.get("id")
             episode_model: Episode = db.query(Episode).filter(Episode.id == id).first()
 
-            blacklisted_keys = ["number", "title"]
+            blacklisted_keys = ["number", "title", "file_size"]
+            filtered_episode_data = {k: v for k, v in episode.items() if k not in blacklisted_keys}
+
             if episode_model:
-                for key, value in episode.items():
-                    if key in blacklisted_keys:
-                        continue
-
+                for key, value in filtered_episode_data.items():
                     setattr(episode_model, key, value)
-
-                episode_model.season = self
-
-                if "number" in episode:
-                    episode_model.set_number(episode["number"])
-
-                if "title" in episode:
-                    episode_model.set_title(episode["title"])
-
-                db.add(episode_model)
             else:
-                filtered_episode_data = {k: v for k, v in episode.items() if k not in blacklisted_keys}
                 episode_model = Episode(**filtered_episode_data)
-
                 episode_model.season = self
+                self.episodes.append(episode_model)
 
+            # Always set number and title using their setters
+            if "number" in episode:
                 episode_model.set_number(episode["number"])
+            if "title" in episode:
                 episode_model.set_title(episode["title"])
 
-                self.episodes.append(episode_model)
-                db.add(episode_model)
+            episode_model.update_file_size_bytes()
+
+            db.add(episode_model)
 
             # Sync episodes
             db.flush()

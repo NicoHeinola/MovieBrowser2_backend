@@ -123,35 +123,23 @@ class Show(Base):
             season_model: Season = db.query(Season).filter(Season.id == id).first()
 
             blacklisted_keys = ["episodes", "number"]
+            season_data = {k: v for k, v in season.items() if k not in blacklisted_keys}
+            number = season.get("number")
 
             if season_model:
-                for key, value in season.items():
-                    if key in blacklisted_keys:
-                        continue
-
+                for key, value in season_data.items():
                     setattr(season_model, key, value)
-
-                season_model.show = self
-
-                if "number" in season:
-                    season_model.set_number(season["number"])
-
-                db.add(season_model)
             else:
-                season_data = season.copy()
-                number: int = season_data["number"]
-
-                for key in blacklisted_keys:
-                    season_data.pop(key, None)
-
                 season_model = Season(**season_data)
-
                 season_model.show = self
+                self.seasons.append(season_model)
 
+            season_model.show = self
+
+            if number is not None:
                 season_model.set_number(number)
 
-                db.add(season_model)
-                self.seasons.append(season_model)
+            db.add(season_model)
 
             # Save changes
             db.flush()
