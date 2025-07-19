@@ -67,8 +67,14 @@ class Show(Base):
 
         uss_not_in = aliased(UserShowStatus)
 
-        # Join with UserShowStatus table and filter by user_id and status
-        return query.join(uss_not_in).filter(uss_not_in.user_id == user_id, uss_not_in.status.notin_(valid_statuses))
+        # Left join to include shows without any status and filter out unwanted statuses
+        # Outer join to include shows without any status for the user
+        query = query.outerjoin(uss_not_in, (uss_not_in.show_id == Show.id) & (uss_not_in.user_id == user_id))
+
+        # Filter: shows with no status or with a status not in the given list
+        query = query.filter(or_(uss_not_in.status.is_(None), uss_not_in.status.notin_(valid_statuses)))
+
+        return query
 
     @staticmethod
     def filterByCategoriesAnyIn(query: Query, categories: list[str]):
