@@ -7,7 +7,8 @@ from middleware.query_parser import QueryParserMiddleware
 from routers import shows, settings, auth, user_show_statuses, websites, user_watch_seasons
 import uvicorn
 
-load_dotenv(override=True)
+load_dotenv(override=False)
+
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI()

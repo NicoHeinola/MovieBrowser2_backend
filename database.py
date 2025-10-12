@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
+load_dotenv(override=False)  # Load environment variables from .env file
 
 # Ensure the database_instance directory exists
 os.makedirs("database_instance", exist_ok=True)

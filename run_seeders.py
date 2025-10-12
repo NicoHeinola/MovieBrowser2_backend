@@ -1,3 +1,4 @@
+import os
 import traceback
 from dotenv import load_dotenv
 from database import SessionLocal
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from seeders.website_seeder import WebsiteSeeder
 
-load_dotenv(override=True)
+load_dotenv(override=False)
 
 
 def run_seeders(db: Session):
