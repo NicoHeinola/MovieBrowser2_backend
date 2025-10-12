@@ -3,6 +3,9 @@ import shutil
 import platform
 import subprocess
 
+from database import get_db
+from models.setting import Setting
+
 
 class VLCMediaPlayerUtil:
     @staticmethod
@@ -16,6 +19,15 @@ class VLCMediaPlayerUtil:
 
         system = platform.system()
         paths_to_check = vlc_executables.get(system, [])
+
+        # Try to find VLC in the settings
+        db = next(get_db())
+        try:
+            setting: Setting = db.query(Setting).filter(Setting.key == "vlc_media_player_path").first()
+            if setting and setting.value:
+                paths_to_check.insert(0, setting.value)
+        finally:
+            db.close()
 
         for path in paths_to_check:
             if os.path.isfile(path):

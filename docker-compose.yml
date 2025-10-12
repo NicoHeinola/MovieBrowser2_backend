@@ -11,8 +11,10 @@ services:
       - ./database_instance:/app/database_instance
       # Mount the data directory for seeders
       - ./data:/app/data
-      # Mount F: drive for video uploads and access (WSL path)
-      - /mnt/f:/app/videos
+      # Mount G: drive for video uploads and access (WSL path)
+      - /mnt/g/New_Vid:/mnt/g/New_Vid:rw
+      # Mount C: drive as read-only for VLC access (WSL path)
+      - /mnt/c:/mnt/c:ro
     env_file:
       - .env
     environment:

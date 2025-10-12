@@ -29,5 +29,5 @@ EXPOSE 8000
 ENV PYTHONPATH=/app
 ENV ENVIRONMENT=production
 
-# Run database migrations and start the application
-CMD ["sh", "-c", "alembic upgrade head && python main.py"]
+# Run database migrations
+CMD ["sh", "-c", "alembic upgrade head && python run_seeders.py && python main.py"]
