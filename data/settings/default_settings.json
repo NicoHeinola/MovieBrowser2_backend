@@ -1,4 +1,4 @@
 [
-  { "key": "shows_path", "value": "F:/New_Vid", "type": "string" },
+  { "key": "shows_path", "value": "/mnt/g/New_Vid_Dev", "type": "string" },
   { "key": "vlc_media_player_path", "value": "/mnt/c/Program Files (x86)/VideoLAN/VLC/vlc.exe", "type": "string" }
 ]
