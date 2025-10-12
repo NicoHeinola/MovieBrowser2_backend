@@ -17,6 +17,7 @@ services:
       - .env
     environment:
       - ENVIRONMENT=production
+      - SQLALCHEMY_DATABASE_URL=sqlite:///./database_instance/production/database.db
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
