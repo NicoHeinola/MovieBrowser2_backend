@@ -257,9 +257,21 @@ def watch_season(request: Request, show_id: int, season_id: int, db: Session = D
 
     try:
         VLCMediaPlayerUtil.open_playlist_from_folder(folder_path)
-    except FileNotFoundError:
-        raise HTTPException(status_code=500, detail="VLC media player not found on this system.")
+    except FileNotFoundError as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "VLC media player not found on this system.",
+                "exception": str(e),
+            },
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to open playlist with VLC: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Failed to open folder with VLC.",
+                "exception": str(e),
+            },
+        )
 
     return {"ok": True}

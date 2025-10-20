@@ -57,6 +57,31 @@ A simple backend for managing and browsing shows/movies.
    sudo systemctl status moviebrowser.service
    ```
 
+### Troubleshooting VLC/GUI Issues
+
+If VLC doesn't work properly when running as a service:
+
+1. **Check if X11 forwarding is enabled in WSL:**
+
+   ```bash
+   echo $DISPLAY
+   # Should show :0 or similar
+   ```
+
+2. **Install and start an X server on Windows** (like VcXsrv or Xming)
+
+3. **Check service logs:**
+
+   ```bash
+   sudo journalctl -u moviebrowser.service -f
+   tail -f /home/user/codes/MovieBrowser2_backend/moviebrowser.log
+   ```
+
+4. **Test VLC manually with service environment:**
+   ```bash
+   sudo -u user DISPLAY=:0 vlc --version
+   ```
+
 - To stop and remove the link:
   ```bash
   sudo systemctl disable --now moviebrowser.service

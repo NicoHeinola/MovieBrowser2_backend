@@ -3,6 +3,8 @@ import shutil
 import platform
 import subprocess
 
+from fastapi import HTTPException
+
 from database import get_db
 from models.setting import Setting
 
@@ -58,33 +60,8 @@ class VLCMediaPlayerUtil:
     @staticmethod
     def run_vlc_with_options(filename: str, cwd: str | None = None):
         vlc_path = VLCMediaPlayerUtil.get_vlc_media_player_path()
-        is_windows = platform.system() == "Windows"
-        is_wsl = "microsoft" in platform.release().lower()
 
         try:
-            if is_windows:
-                # On Windows, use start to open VLC in a new window
-                subprocess.Popen(["start", "", vlc_path, filename], shell=True, cwd=cwd)
-            elif is_wsl:
-                # On WSL, open using Windows VLC using CMD
-                # Remove mnt prefix for Windows path compatibility
-                windows_path = filename.replace("/mnt/c/", "C:\\").replace("/", "\\")
-                vlc_path = vlc_path.replace("/mnt/c/", "C:\\").replace("/", "\\")
-                subprocess.run(["cmd.exe", "/C", "start", "", vlc_path, windows_path], cwd=cwd)
-            else:
-                # On macOS and Linux, just run VLC directly
-                subprocess.Popen([vlc_path, filename], cwd=cwd)
-
+            subprocess.Popen([vlc_path, filename], cwd=cwd)
         except FileNotFoundError:
-            print(f"Could not start VLC in directory {cwd}. Trying with full path.")
-            if is_windows:
-                subprocess.Popen(["start", "", vlc_path, os.path.join(cwd, filename)], shell=True)
-            elif is_wsl:
-                # On WSL, open using Windows VLC using CMD
-                # Remove mnt prefix for Windows path compatibility
-                windows_path = os.path.join(cwd, filename).replace("/mnt/c/", "C:\\").replace("/", "\\")
-                vlc_path = vlc_path.replace("/mnt/c/", "C:\\").replace("/", "\\")
-                subprocess.run(["cmd.exe", "/C", "start", "", vlc_path, windows_path])
-            else:
-                # On macOS and Linux, just run VLC directly
-                subprocess.Popen([vlc_path, filename], cwd=cwd)
+            subprocess.Popen([vlc_path, filename], cwd=cwd)
