@@ -28,5 +28,7 @@ Thumbs.db
 # VSCode settings
 .vscode/
 
+./scripts/moviebrowser.service
+
 *.err
 *.log

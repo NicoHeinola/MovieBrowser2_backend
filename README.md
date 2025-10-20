@@ -36,22 +36,20 @@ A simple backend for managing and browsing shows/movies.
 
 ## Running this on the background in WSL
 
-1. Open `scripts/moviebrowser.service` and set `SERVICE_USER` and `USER_HOME` correctly.
+1. **Configure and install the service:**
 
-2. Create a system link (two options — use one):
+   ```bash
+   # Make the setup script executable
+   chmod +x scripts/setup_service.sh
 
-   - Using a manual symlink (preferred):
+   # Run with default values (user: "user", home: "/home/user")
+   ./scripts/setup_service.sh
 
-     ```bash
-     sudo ln -s /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service /etc/systemd/system/moviebrowser.service
-     ```
+   # Or specify custom values
+   ./scripts/setup_service.sh myusername /home/myusername
+   ```
 
-   - Using systemctl:
-     ```bash
-     sudo systemctl link /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service
-     ```
-
-3. Reload systemd, enable and start the service:
+2. **Enable and start the service:**
 
    ```bash
    sudo systemctl daemon-reload
@@ -65,6 +63,8 @@ A simple backend for managing and browsing shows/movies.
   sudo systemctl daemon-reload
   # if you used systemctl link:
   sudo systemctl unlink /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service
+  # If you linked the unit with 'systemctl link', remove the created symlink manually:
+  sudo rm /etc/systemd/system/moviebrowser.service
   # or if you created a manual symlink:
   sudo rm /etc/systemd/system/moviebrowser.service
   sudo systemctl daemon-reload
