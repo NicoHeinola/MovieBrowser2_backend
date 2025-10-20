@@ -53,8 +53,8 @@ A simple backend for managing and browsing shows/movies.
 
    ```bash
    sudo systemctl daemon-reload
-   sudo systemctl enable --now moviebrowser.service
-   sudo systemctl status moviebrowser.service
+   sudo systemctl enable --now moviebrowser_backend_v1.service
+   sudo systemctl status moviebrowser_backend_v1.service
    ```
 
 ### Troubleshooting VLC/GUI Issues
@@ -73,8 +73,8 @@ If VLC doesn't work properly when running as a service:
 3. **Check service logs:**
 
    ```bash
-   sudo journalctl -u moviebrowser.service -f
-   tail -f /home/user/codes/MovieBrowser2_backend/moviebrowser.log
+   sudo journalctl -u moviebrowser_backend_v1.service -f
+   tail -f /home/user/codes/MovieBrowser2_backend_v1/moviebrowser.log
    ```
 
 4. **Test VLC manually with service environment:**
@@ -84,14 +84,12 @@ If VLC doesn't work properly when running as a service:
 
 - To stop and remove the link:
   ```bash
-  sudo systemctl disable --now moviebrowser.service
+  sudo systemctl disable --now moviebrowser_backend_v1.service
   sudo systemctl daemon-reload
   # if you used systemctl link:
-  sudo systemctl unlink /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service
-  # If you linked the unit with 'systemctl link', remove the created symlink manually:
-  sudo rm /etc/systemd/system/moviebrowser.service
+  sudo systemctl unlink /home/user/codes/MovieBrowser2_backend_v1/scripts/moviebrowser_backend_v1.service
   # or if you created a manual symlink:
-  sudo rm /etc/systemd/system/moviebrowser.service
+  sudo rm /etc/systemd/system/moviebrowser_backend_v1.service
   sudo systemctl daemon-reload
   ```
 
