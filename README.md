@@ -16,7 +16,13 @@ A simple backend for managing and browsing shows/movies.
    alembic upgrade head
    ```
 
-3. Start the server:
+3. Run seeders
+
+   ```bash
+   python run_seeders.py
+   ```
+
+4. Start the server:
 
    ```bash
    uvicorn main:app --reload
@@ -28,13 +34,41 @@ A simple backend for managing and browsing shows/movies.
    python main.py
    ```
 
-## Seeders
+## Running this on the background in WSL
 
-To apply seeders, run:
+1. Open `scripts/moviebrowser.service` and set `SERVICE_USER` and `USER_HOME` correctly.
 
-```bash
-python run_seeders.py
-```
+2. Create a system link (two options — use one):
+
+   - Using a manual symlink (preferred):
+
+     ```bash
+     sudo ln -s /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service /etc/systemd/system/moviebrowser.service
+     ```
+
+   - Using systemctl:
+     ```bash
+     sudo systemctl link /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service
+     ```
+
+3. Reload systemd, enable and start the service:
+
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now moviebrowser.service
+   sudo systemctl status moviebrowser.service
+   ```
+
+- To stop and remove the link:
+  ```bash
+  sudo systemctl disable --now moviebrowser.service
+  sudo systemctl daemon-reload
+  # if you used systemctl link:
+  sudo systemctl unlink /home/user/codes/MovieBrowser2_backend/scripts/moviebrowser.service
+  # or if you created a manual symlink:
+  sudo rm /etc/systemd/system/moviebrowser.service
+  sudo systemctl daemon-reload
+  ```
 
 ## Rollback
 
@@ -45,11 +79,6 @@ alembic downgrade -1
 ```
 
 You can specify a particular revision by replacing `-1` with the desired revision identifier.
-
-## API
-
-- `GET /shows` - List all shows
-- `POST /shows` - Add a new show
 
 ## License
 

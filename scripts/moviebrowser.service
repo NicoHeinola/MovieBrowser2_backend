@@ -4,19 +4,21 @@ After=network.target
 
 [Service]
 Type=simple
-User=user
-WorkingDirectory=/home/user/codes/MovieBrowser2_backend
+Environment="SERVICE_USER=user"
+Environment="USER_HOME=/home/user"
+User=${SERVICE_USER}
+WorkingDirectory=${USER_HOME}/codes/MovieBrowser2_backend
 Environment="ENVIRONMENT=production"
 Environment="SQLALCHEMY_DATABASE_URL=sqlite:///./database_instance/production/database.db"
-Environment="PYTHONPATH=/home/user/codes/MovieBrowser2_backend"
-ExecStartPre=/bin/mkdir -p /home/user/codes/MovieBrowser2_backend/database_instance/production
-ExecStartPre=/bin/bash -c 'source /home/user/codes/MovieBrowser2_backend/.venv/bin/activate && alembic upgrade head'
-ExecStartPre=/bin/bash -c 'source /home/user/codes/MovieBrowser2_backend/.venv/bin/activate && python3 run_seeders.py'
-ExecStart=/bin/bash -c 'source /home/user/codes/MovieBrowser2_backend/.venv/bin/activate && python3 main.py'
+Environment="PYTHONPATH=${USER_HOME}/codes/MovieBrowser2_backend"
+ExecStartPre=/bin/mkdir -p ${USER_HOME}/codes/MovieBrowser2_backend/database_instance/production
+ExecStartPre=/bin/bash -c 'source ${USER_HOME}/codes/MovieBrowser2_backend/.venv/bin/activate && alembic upgrade head'
+ExecStartPre=/bin/bash -c 'source ${USER_HOME}/codes/MovieBrowser2_backend/.venv/bin/activate && python3 run_seeders.py'
+ExecStart=/bin/bash -c 'source ${USER_HOME}/codes/MovieBrowser2_backend/.venv/bin/activate && python3 main.py'
 Restart=always
 RestartSec=10
-StandardOutput=append:/home/user/codes/MovieBrowser2_backend/moviebrowser.log
-StandardError=append:/home/user/codes/MovieBrowser2_backend/moviebrowser.log
+StandardOutput=append:${USER_HOME}/codes/MovieBrowser2_backend/moviebrowser.log
+StandardError=append:${USER_HOME}/codes/MovieBrowser2_backend/moviebrowser.log
 
 [Install]
 WantedBy=multi-user.target
